@@ -90,8 +90,8 @@ const CONFIG = {
     POLL_INTERVAL: 3000,
     STREAM_RETRY_INTERVAL: 5000,
     DETECTION_HISTORY_MAX: 10,
-    DETECTION_INTERVAL: 3000, // Increased from 100ms to 3 seconds - CPU processing takes time
-    OCR_INTERVAL: 2000, // 2 seconds - fast OCR scan for immediate text reading
+    DETECTION_INTERVAL: 300, // Decreased to 300ms for faster processing
+    OCR_INTERVAL: 1000, // Decreased to 1 second - fast OCR scan for immediate text reading
     FACE_DETECT_INTERVAL: 4000, // 4 seconds - face recognition scan
 };
 
@@ -734,9 +734,9 @@ async function runDetection() {
     try {
         // Capture frame from video at reduced resolution for faster processing
         const canvas = document.createElement('canvas');
-        // Use 640x480 for fast detection instead of full resolution
-        const targetWidth = 640;
-        const targetHeight = 480;
+        // Use 320x240 for faster detection (lower pixel resolution)
+        const targetWidth = 320;
+        const targetHeight = 240;
         canvas.width = targetWidth;
         canvas.height = targetHeight;
         const ctx = canvas.getContext('2d');

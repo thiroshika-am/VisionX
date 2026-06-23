@@ -95,3 +95,13 @@
 - [ ] Caregiver mobile app (companion tracking)
 - [ ] Multi-device support (track multiple blind users)
 - [ ] Cloud dashboard for remote monitoring
+
+---
+
+## 👁️ Vision Enhancements (Planned)
+
+- [ ] Implement Monocular Depth Estimation (e.g., MiDaS) to replace hardcoded height-based distance heuristics.
+- [ ] Add Pathway & Surface Segmentation (YOLO-seg or MobileNet) to explicitly detect walkable paths vs hazards.
+- [ ] Implement Low-Light Image Enhancement (e.g., Zero-DCE) preprocessing for better ESP32-CAM night vision.
+- [ ] Train/Tune specialized hazard detection models for blind-specific hazards (potholes, low-hanging branches, traffic lights).
+- [ ] Optimize models for Edge Processing (TFLite/TensorRT) to reduce latency.

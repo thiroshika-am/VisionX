@@ -1,9 +1,9 @@
 """
-YOLO Object Detection Module for SmartCap AI
+YOLO Object Detection Module for VisionX
 Detects obstacles and objects from webcam frames
-Uses ultralytics YOLOv8n (nano) for fast real-time detection
+Uses ultralytics YOLOv8l (large) for high-accuracy detection
 GPU-accelerated with CUDA for maximum performance
-Includes object tracking for position change detection
+Includes BoT-SORT multi-object tracking
 """
 
 import os
@@ -15,9 +15,13 @@ import time
 from typing import Dict, List, Tuple, Optional
 from ultralytics import YOLO
 
-# Store model in workspace root - using YOLOv8n for fast detection
+# Store model in workspace root
 MODEL_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-MODEL_PATH = os.path.join(MODEL_DIR, "yolov8n.pt")
+
+# Use YOLOv8l (large) for high accuracy. Falls back to yolov8n if l not present.
+MODEL_PATH_L = os.path.join(MODEL_DIR, "yolov8l.pt")
+MODEL_PATH_N = os.path.join(MODEL_DIR, "yolov8n.pt")
+MODEL_PATH = MODEL_PATH_L  # yolov8l auto-downloads on first run
 
 # Auto-detect GPU
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -60,19 +64,25 @@ class ObjectDetector:
         self.approach_threshold = 0.05  # Detect approach if distance decreases by 5cm
     
     def _load_model(self):
-        """Load YOLO model - auto downloads if not present."""
+        """Load YOLO model — downloads automatically if not present."""
         try:
-            print(f"Loading YOLOv8n (nano) model from {MODEL_PATH}...")
             print(f"Device: {DEVICE.upper()} {'(GPU Accelerated)' if DEVICE == 'cuda' else '(CPU Mode)'}")
             if DEVICE == 'cuda':
                 print(f"GPU: {torch.cuda.get_device_name(0)}")
-            # YOLOv8n provides fast detection for real-time blind assistance
-            self.model = YOLO(MODEL_PATH)
+            # YOLOv8l for maximum accuracy (auto-downloads ~87MB on first run)
+            print(f"Loading YOLOv8l (large) model...")
+            self.model = YOLO(MODEL_PATH)  # auto-downloads yolov8l.pt
             self.model.to(DEVICE)
-            print("YOLOv8n model loaded successfully on GPU!" if DEVICE == 'cuda' else "YOLOv8n model loaded (CPU mode)")
+            print(f"YOLOv8l loaded on {'GPU' if DEVICE == 'cuda' else 'CPU'}")
         except Exception as e:
-            print(f"Error loading model: {e}")
-            raise
+            print(f"Error loading YOLOv8l, trying fallback to yolov8n: {e}")
+            try:
+                self.model = YOLO(MODEL_PATH_N)
+                self.model.to(DEVICE)
+                print("Fallback: YOLOv8n loaded")
+            except Exception as e2:
+                print(f"Error loading fallback model: {e2}")
+                raise
     
     def _calculate_iou(self, box1: Dict, box2: Dict) -> float:
         """Calculate Intersection over Union between two bounding boxes."""

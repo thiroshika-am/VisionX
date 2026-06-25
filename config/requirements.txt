@@ -9,3 +9,7 @@ numpy>=1.24.0
 pandas>=2.0.0
 # OCR
 easyocr>=1.7.0
+# Multimodal AI (Gesture, Pose, Emotion)
+mediapipe>=0.10.0
+fer>=25.0.0
+ultralytics>=8.0.0

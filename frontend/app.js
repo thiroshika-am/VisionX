@@ -90,27 +90,40 @@ const CONFIG = {
     POLL_INTERVAL: 3000,
     STREAM_RETRY_INTERVAL: 5000,
     DETECTION_HISTORY_MAX: 10,
-    DETECTION_INTERVAL: 300, // Decreased to 300ms for faster processing
-    OCR_INTERVAL: 1000, // Decreased to 1 second - fast OCR scan for immediate text reading
-    FACE_DETECT_INTERVAL: 4000, // 4 seconds - face recognition scan
+    DETECTION_INTERVAL: 300,
+    OCR_INTERVAL: 1000,
+    FACE_DETECT_INTERVAL: 4000,
+    GESTURE_INTERVAL: 600,     // gesture + pose every 600ms
+    EMOTION_INTERVAL: 1200,    // emotion every 1.2s
+    SCENE_INTERVAL: 6000,      // scene description every 6s
 };
 
 const STATE = {
     detectionHistory: [],
-    voiceActive: true, // Voice always on by default
+    voiceActive: true,
     systemStatus: { esp32: false, camera: false, ai: false, voice: true, gps: false },
     pollingTimer: null,
     streamRetryTimer: null,
     accuracyCircle: null,
     detectionTimer: null,
-    ocrTimer: null, // OCR detection timer
-    faceDetectTimer: null, // Face recognition timer
-    isDetectingFaces: false, // Face detection in progress
+    ocrTimer: null,
+    faceDetectTimer: null,
+    gestureTimer: null,
+    emotionTimer: null,
+    sceneTimer: null,
+    sceneCountdown: 6,
+    isDetectingFaces: false,
     isDetecting: false,
-    isReadingText: false, // OCR in progress
+    isReadingText: false,
+    isDetectingGesture: false,
+    isDetectingEmotion: false,
+    isDetectingPose: false,
     lastDetections: [],
-    lastOcrText: '', // Last detected text
-    announcedTexts: new Set(), // Texts already announced
+    lastOcrText: '',
+    lastGestures: [],
+    lastEmotions: [],
+    lastPoses: [],
+    announcedTexts: new Set(),
     capConnected: false,
     hasInitialLocation: false,
     environment: 'detecting',
@@ -330,15 +343,14 @@ function startDetection() {
     detectionCtx = detectionCanvas.getContext('2d');
     updateStatusLight('ai', true);
     
-    // Run detection at regular intervals
     STATE.detectionTimer = setInterval(runDetection, CONFIG.DETECTION_INTERVAL);
     console.log('Detection started');
     
-    // Start OCR detection (less frequent)
     startOCR();
-    
-    // Start face recognition
     startFaceDetection();
+    startGestureDetection();   // NEW
+    startEmotionDetection();   // NEW
+    startSceneAnalysis();      // NEW
 }
 
 function stopDetection() {
@@ -2552,3 +2564,338 @@ window.addEventListener('beforeunload', () => {
 document.readyState === 'loading'
     ? document.addEventListener('DOMContentLoaded', init)
     : init();
+
+
+// ============================================================
+// GESTURE RECOGNITION
+// ============================================================
+
+function startGestureDetection() {
+    if (STATE.gestureTimer) return;
+    STATE.gestureTimer = setInterval(runGestureDetection, CONFIG.GESTURE_INTERVAL);
+    console.log('[Gesture] Detection started');
+    // Also start pose at the same cadence
+    STATE.poseTimer = setInterval(runPoseDetection, CONFIG.GESTURE_INTERVAL);
+}
+
+async function runGestureDetection() {
+    if (STATE.isDetectingGesture) return;
+    const video = document.getElementById('camera-feed');
+    if (!video || video.readyState < 2) return;
+
+    STATE.isDetectingGesture = true;
+    try {
+        const imageB64 = captureFrameBase64(video);
+        const res = await fetch(`${CONFIG.API_BASE}/api/gesture`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image: imageB64 }),
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        STATE.lastGestures = data.gestures || [];
+        updateGestureUI(STATE.lastGestures);
+    } catch (e) {
+        // silence network errors
+    } finally {
+        STATE.isDetectingGesture = false;
+    }
+}
+
+function updateGestureUI(gestures) {
+    const badgeEl  = document.getElementById('gesture-badge');
+    const emojiEl  = document.getElementById('gesture-emoji');
+    const nameEl   = document.getElementById('gesture-name');
+    const handEl   = document.getElementById('gesture-hand');
+    const fillEl   = document.getElementById('gesture-conf-fill');
+    const confEl   = document.getElementById('gesture-conf-label');
+    if (!emojiEl) return;
+
+    if (!gestures || gestures.length === 0) {
+        if (badgeEl) { badgeEl.textContent = 'READY'; badgeEl.className = 'ai-badge'; }
+        emojiEl.textContent = '🤚';
+        if (nameEl) nameEl.textContent = 'No Gesture';
+        if (handEl) handEl.textContent = '—';
+        if (fillEl) fillEl.style.width = '0%';
+        if (confEl) confEl.textContent = '0%';
+        return;
+    }
+
+    const g = gestures[0];
+    if (badgeEl) { badgeEl.textContent = 'ACTIVE'; badgeEl.className = 'ai-badge active'; }
+
+    // Animate emoji pop
+    emojiEl.classList.remove('pulse');
+    void emojiEl.offsetWidth; // reflow
+    emojiEl.classList.add('pulse');
+    emojiEl.textContent = g.emoji || '✋';
+
+    if (nameEl) nameEl.textContent = g.display_name || g.gesture;
+    if (handEl) handEl.textContent = `${g.hand || '?'} Hand · ${Math.round((g.confidence || 0) * 100)}% confidence`;
+    const pct = Math.round((g.confidence || 0) * 100);
+    if (fillEl) fillEl.style.width = pct + '%';
+    if (confEl) confEl.textContent = pct + '%';
+}
+
+
+// ============================================================
+// EMOTION DETECTION
+// ============================================================
+
+function startEmotionDetection() {
+    if (STATE.emotionTimer) return;
+    STATE.emotionTimer = setInterval(runEmotionDetection, CONFIG.EMOTION_INTERVAL);
+    console.log('[Emotion] Detection started');
+}
+
+async function runEmotionDetection() {
+    if (STATE.isDetectingEmotion) return;
+    const video = document.getElementById('camera-feed');
+    if (!video || video.readyState < 2) return;
+
+    STATE.isDetectingEmotion = true;
+    try {
+        const imageB64 = captureFrameBase64(video);
+        const res = await fetch(`${CONFIG.API_BASE}/api/emotion`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image: imageB64 }),
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        STATE.lastEmotions = data.emotions || [];
+        updateEmotionUI(STATE.lastEmotions);
+    } catch (e) {
+        // silence
+    } finally {
+        STATE.isDetectingEmotion = false;
+    }
+}
+
+const EMOTION_EMOJI_MAP = {
+    happy: '😊', sad: '😢', angry: '😠', surprised: '😲',
+    fearful: '😨', disgusted: '🤢', neutral: '😐',
+};
+
+function updateEmotionUI(emotions) {
+    const badgeEl = document.getElementById('emotion-badge');
+    const emojiEl = document.getElementById('emotion-emoji');
+    const labelEl = document.getElementById('emotion-label');
+    const barsEl  = document.getElementById('emotion-bars');
+    if (!emojiEl) return;
+
+    if (!emotions || emotions.length === 0) {
+        if (badgeEl) { badgeEl.textContent = 'READY'; badgeEl.className = 'ai-badge'; }
+        emojiEl.textContent = '😐';
+        if (labelEl) labelEl.textContent = 'No Face Detected';
+        if (barsEl) barsEl.innerHTML = '';
+        return;
+    }
+
+    const e = emotions[0];
+    if (badgeEl) { badgeEl.textContent = 'ACTIVE'; badgeEl.className = 'ai-badge active'; }
+    emojiEl.textContent = EMOTION_EMOJI_MAP[e.dominant_emotion] || '😐';
+    if (labelEl) labelEl.textContent = (e.dominant_emotion || 'neutral').charAt(0).toUpperCase()
+                                      + (e.dominant_emotion || 'neutral').slice(1);
+
+    // Draw mini bar chart for all 7 emotions
+    if (barsEl && e.all_emotions) {
+        const emotionOrder = ['happy','sad','angry','surprised','fearful','disgusted','neutral'];
+        barsEl.innerHTML = emotionOrder.map(name => {
+            const val = e.all_emotions[name] || 0;
+            const pct = Math.round(val * 100);
+            return `
+            <div class="emotion-bar-row">
+                <span class="emotion-bar-label">${name}</span>
+                <div class="emotion-bar-track">
+                    <div class="emotion-bar-fill emotion-${name}" style="width:${pct}%"></div>
+                </div>
+                <span class="emotion-bar-pct">${pct}%</span>
+            </div>`;
+        }).join('');
+    }
+}
+
+
+// ============================================================
+// POSE ESTIMATION
+// ============================================================
+
+async function runPoseDetection() {
+    if (STATE.isDetectingPose) return;
+    const video = document.getElementById('camera-feed');
+    if (!video || video.readyState < 2) return;
+
+    STATE.isDetectingPose = true;
+    try {
+        const imageB64 = captureFrameBase64(video);
+        const res = await fetch(`${CONFIG.API_BASE}/api/pose`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image: imageB64 }),
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        STATE.lastPoses = data.poses || [];
+        updatePoseUI(STATE.lastPoses);
+    } catch (e) {
+        // silence
+    } finally {
+        STATE.isDetectingPose = false;
+    }
+}
+
+// Skeleton connections (same as backend POSE_CONNECTIONS)
+const POSE_CONNECTIONS = [
+    [11,12],[11,13],[13,15],[12,14],[14,16],
+    [11,23],[12,24],[23,24],
+    [23,25],[25,27],[24,26],[26,28],
+    [27,29],[29,31],[28,30],[30,32],
+];
+
+function drawStickFigure(canvas, keypoints) {
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    ctx.clearRect(0, 0, W, H);
+    if (!keypoints || keypoints.length < 33) return;
+
+    // Scale landmark coords (0-1) to canvas
+    const scaleX = kp => kp.x * W;
+    const scaleY = kp => kp.y * H;
+
+    ctx.strokeStyle = 'rgba(124, 58, 237, 0.8)';
+    ctx.lineWidth = 1.5;
+
+    // Draw connections
+    for (const [a, b] of POSE_CONNECTIONS) {
+        const kpA = keypoints[a], kpB = keypoints[b];
+        if (!kpA || !kpB) continue;
+        if ((kpA.visibility || 0) < 0.3 || (kpB.visibility || 0) < 0.3) continue;
+        ctx.beginPath();
+        ctx.moveTo(scaleX(kpA), scaleY(kpA));
+        ctx.lineTo(scaleX(kpB), scaleY(kpB));
+        ctx.stroke();
+    }
+
+    // Draw landmark dots
+    ctx.fillStyle = '#00D4FF';
+    for (const kp of keypoints) {
+        if ((kp.visibility || 0) < 0.3) continue;
+        ctx.beginPath();
+        ctx.arc(scaleX(kp), scaleY(kp), 2, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+function updatePoseUI(poses) {
+    const badgeEl = document.getElementById('pose-badge');
+    const labelEl = document.getElementById('pose-label');
+    const leanEl  = document.getElementById('pose-lean');
+    const fillEl  = document.getElementById('pose-conf-fill');
+    const confEl  = document.getElementById('pose-conf-label');
+    const canvas  = document.getElementById('pose-canvas');
+    if (!labelEl) return;
+
+    if (!poses || poses.length === 0) {
+        if (badgeEl) { badgeEl.textContent = 'READY'; badgeEl.className = 'ai-badge'; }
+        labelEl.textContent = 'No Person Detected';
+        if (leanEl) leanEl.textContent = '—';
+        if (fillEl) fillEl.style.width = '0%';
+        if (confEl) confEl.textContent = '0%';
+        if (canvas) { const c = canvas.getContext('2d'); c.clearRect(0,0,canvas.width,canvas.height); }
+        return;
+    }
+
+    const p = poses[0];
+    if (badgeEl) { badgeEl.textContent = 'ACTIVE'; badgeEl.className = 'ai-badge active'; }
+    labelEl.textContent = p.display_name || p.posture;
+
+    if (leanEl && p.lean) {
+        leanEl.textContent = p.lean.direction !== 'upright'
+            ? p.lean.direction.replace(/_/g,' ')
+            : 'Upright posture';
+    }
+
+    const pct = Math.round((p.confidence || 0) * 100);
+    if (fillEl) fillEl.style.width = pct + '%';
+    if (confEl) confEl.textContent = pct + '%';
+
+    // Draw stick figure
+    if (canvas && p.keypoints) {
+        drawStickFigure(canvas, p.keypoints);
+    }
+}
+
+
+// ============================================================
+// SCENE INTELLIGENCE
+// ============================================================
+
+function startSceneAnalysis() {
+    if (STATE.sceneTimer) return;
+    STATE.sceneTimer = setInterval(runSceneAnalysis, CONFIG.SCENE_INTERVAL);
+
+    // Countdown display
+    STATE.sceneCountdownTimer = setInterval(() => {
+        const el = document.getElementById('scene-timer');
+        if (!el) return;
+        STATE.sceneCountdown--;
+        if (STATE.sceneCountdown <= 0) {
+            STATE.sceneCountdown = CONFIG.SCENE_INTERVAL / 1000;
+            el.textContent = '…';
+        } else {
+            el.textContent = STATE.sceneCountdown + 's';
+        }
+    }, 1000);
+
+    // Run immediately once
+    setTimeout(runSceneAnalysis, 1500);
+    console.log('[Scene] Analysis started');
+}
+
+async function runSceneAnalysis() {
+    STATE.sceneCountdown = CONFIG.SCENE_INTERVAL / 1000;
+    const el = document.getElementById('scene-timer');
+    if (el) el.textContent = '…';
+
+    try {
+        const res = await fetch(`${CONFIG.API_BASE}/api/scene`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                detections: STATE.lastDetections || [],
+                gestures:   STATE.lastGestures   || [],
+                emotions:   STATE.lastEmotions   || [],
+                poses:      STATE.lastPoses      || [],
+            }),
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.description) {
+            updateSceneUI(data.description);
+        }
+    } catch (e) {
+        // silence
+    }
+}
+
+function updateSceneUI(description) {
+    const el = document.getElementById('scene-description');
+    if (!el) return;
+    el.innerHTML = `<p class="scene-text-appear">${description}</p>`;
+}
+
+
+// ============================================================
+// UTILITY: Capture frame from video element as base64
+// ============================================================
+
+function captureFrameBase64(video) {
+    const canvas = document.createElement('canvas');
+    canvas.width  = video.videoWidth  || 640;
+    canvas.height = video.videoHeight || 480;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    // Return without data:image/jpeg; prefix (backend strips it anyway)
+    return canvas.toDataURL('image/jpeg', 0.75).split(',')[1];
+}

@@ -24,6 +24,9 @@ from ai_modules.detector import get_detector
 from ai_modules.llm_alerts import get_alert_generator
 from ai_modules.ocr_engine import get_ocr_reader
 from ai_modules.face_recognition_engine import get_face_engine
+from ai_modules.gesture_engine import get_gesture_engine
+from ai_modules.emotion_engine import get_emotion_engine
+from ai_modules.pose_engine import get_pose_engine
 
 # ============================================
 # CONFIGURATION
@@ -516,7 +519,214 @@ def detect_faces():
 
     except Exception as e:
         logger.error(f"Face detect error: {e}", exc_info=True)
-        return jsonify({"error": str(e), "faces": []}), 500
+        return jsonify({\"error\": str(e), \"faces\": []}), 500
+
+
+# ============================================
+# GESTURE RECOGNITION
+# ============================================
+
+@app.route("/api/gesture", methods=["POST"])
+def detect_gesture():
+    """
+    Detect hand gestures in an image using MediaPipe.
+    Expected JSON: { "image": "base64_image" }
+    Returns: { "gestures": [...], "count": int }
+    """
+    try:
+        data = request.get_json(force=True)
+        image_b64 = data.get("image")
+        if not image_b64:
+            return jsonify({"error": "No image provided", "gestures": []}), 400
+
+        engine = get_gesture_engine()
+        result = engine.detect_from_base64(image_b64)
+
+        if result.get("gestures"):
+            names = ", ".join(g["gesture"] for g in result["gestures"])
+            logger.info(f"[Gesture] Detected: {names}")
+
+        return jsonify(result)
+    except Exception as e:
+        logger.error(f"Gesture detection error: {e}", exc_info=True)
+        return jsonify({"error": str(e), "gestures": []}), 500
+
+
+# ============================================
+# EMOTION RECOGNITION
+# ============================================
+
+@app.route("/api/emotion", methods=["POST"])
+def detect_emotion():
+    """
+    Detect facial emotions in an image.
+    Expected JSON: { "image": "base64_image" }
+    Returns: { "emotions": [...], "count": int }
+    """
+    try:
+        data = request.get_json(force=True)
+        image_b64 = data.get("image")
+        if not image_b64:
+            return jsonify({"error": "No image provided", "emotions": []}), 400
+
+        engine = get_emotion_engine()
+        result = engine.detect_from_base64(image_b64)
+
+        if result.get("emotions"):
+            dominant = result["emotions"][0].get("dominant_emotion", "?")
+            logger.info(f"[Emotion] Dominant: {dominant}")
+
+        return jsonify(result)
+    except Exception as e:
+        logger.error(f"Emotion detection error: {e}", exc_info=True)
+        return jsonify({"error": str(e), "emotions": []}), 500
+
+
+# ============================================
+# POSE ESTIMATION
+# ============================================
+
+@app.route("/api/pose", methods=["POST"])
+def detect_pose():
+    """
+    Detect body pose and posture in an image.
+    Expected JSON: { "image": "base64_image" }
+    Returns: { "poses": [...], "count": int }
+    """
+    try:
+        data = request.get_json(force=True)
+        image_b64 = data.get("image")
+        if not image_b64:
+            return jsonify({"error": "No image provided", "poses": []}), 400
+
+        engine = get_pose_engine()
+        result = engine.detect_from_base64(image_b64)
+
+        if result.get("poses"):
+            posture = result["poses"][0].get("posture", "?")
+            logger.info(f"[Pose] Posture: {posture}")
+
+        return jsonify(result)
+    except Exception as e:
+        logger.error(f"Pose detection error: {e}", exc_info=True)
+        return jsonify({"error": str(e), "poses": []}), 500
+
+
+# ============================================
+# SCENE DESCRIPTION (LLM)
+# ============================================
+
+@app.route("/api/scene", methods=["POST"])
+def describe_scene():
+    """
+    Generate a natural language description of the scene.
+    Expected JSON: {
+        "detections": [...],
+        "gestures": [...],
+        "emotions": [...],
+        "poses": [...]
+    }
+    Returns: { "description": "..." }
+    """
+    try:
+        data = request.get_json(force=True)
+        generator = get_alert_generator()
+        description = generator.generate_scene_description(
+            detections=data.get("detections", []),
+            gestures=data.get("gestures", []),
+            emotions=data.get("emotions", []),
+            poses=data.get("poses", []),
+        )
+        logger.info(f"[Scene] {description[:80]}...")
+        return jsonify({"description": description})
+    except Exception as e:
+        logger.error(f"Scene description error: {e}", exc_info=True)
+        return jsonify({"error": str(e), "description": ""}), 500
+
+
+# ============================================
+# UNIFIED MULTIMODAL ANALYSIS
+# ============================================
+
+@app.route("/api/analyze-frame", methods=["POST"])
+def analyze_frame():
+    """
+    Run ALL AI modules on a single frame in parallel.
+    Expected JSON: { "image": "base64_image", "include_scene": bool }
+    Returns combined result from all engines.
+    """
+    import time
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    t_start = time.time()
+    try:
+        data = request.get_json(force=True)
+        image_b64 = data.get("image")
+        include_scene = data.get("include_scene", False)
+
+        if not image_b64:
+            return jsonify({"error": "No image provided"}), 400
+
+        results = {}
+        errors = {}
+
+        # Run all engines in parallel
+        def run_detection():
+            return "objects", get_detector().detect_from_base64(image_b64)
+
+        def run_gesture():
+            return "gestures", get_gesture_engine().detect_from_base64(image_b64)
+
+        def run_emotion():
+            return "emotions", get_emotion_engine().detect_from_base64(image_b64)
+
+        def run_pose():
+            return "poses", get_pose_engine().detect_from_base64(image_b64)
+
+        tasks = [run_detection, run_gesture, run_emotion, run_pose]
+
+        with ThreadPoolExecutor(max_workers=4) as executor:
+            futures = {executor.submit(fn): fn.__name__ for fn in tasks}
+            for future in as_completed(futures, timeout=15):
+                try:
+                    key, value = future.result()
+                    results[key] = value
+                except Exception as e:
+                    fn_name = futures[future]
+                    errors[fn_name] = str(e)
+                    logger.warning(f"[analyze-frame] {fn_name} failed: {e}")
+
+        # Optional: generate scene description from all results
+        description = None
+        if include_scene:
+            try:
+                generator = get_alert_generator()
+                description = generator.generate_scene_description(
+                    detections=results.get("objects", {}).get("detections", []),
+                    gestures=results.get("gestures", {}).get("gestures", []),
+                    emotions=results.get("emotions", {}).get("emotions", []),
+                    poses=results.get("poses", {}).get("poses", []),
+                )
+            except Exception as e:
+                errors["scene"] = str(e)
+
+        processing_ms = round((time.time() - t_start) * 1000)
+
+        return jsonify({
+            "objects":      results.get("objects", {}).get("detections", []),
+            "gestures":     results.get("gestures", {}).get("gestures", []),
+            "emotions":     results.get("emotions", {}).get("emotions", []),
+            "poses":        results.get("poses", {}).get("poses", []),
+            "alert_level":  results.get("objects", {}).get("alert_level", "SAFE"),
+            "annotated_frame": results.get("objects", {}).get("annotated_frame"),
+            "scene_description": description,
+            "processing_ms": processing_ms,
+            "errors": errors if errors else None,
+        })
+
+    except Exception as e:
+        logger.error(f"analyze-frame error: {e}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
 
 
 def device_watchdog():

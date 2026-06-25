@@ -269,6 +269,161 @@ Output only the spoken text:"""
             return None
 
 
+    def generate_scene_description(
+        self,
+        detections: List[Dict] = None,
+        gestures: List[Dict] = None,
+        emotions: List[Dict] = None,
+        poses: List[Dict] = None,
+    ) -> str:
+        """
+        Generate a comprehensive natural-language description of the observed scene
+        combining all modalities: objects, gestures, emotions, and body poses.
+        """
+        detections = detections or []
+        gestures   = gestures   or []
+        emotions   = emotions   or []
+        poses      = poses      or []
+
+        if not any([detections, gestures, emotions, poses]):
+            return "No scene elements detected."
+
+        if self.llm_provider in ["groq", "openai"]:
+            return self._scene_with_llm(detections, gestures, emotions, poses)
+        elif self.llm_provider == "gemini":
+            return self._scene_with_gemini(detections, gestures, emotions, poses)
+        else:
+            return self._scene_template(detections, gestures, emotions, poses)
+
+    def _build_scene_context(self, detections, gestures, emotions, poses) -> str:
+        """Build a text description of the scene for the LLM prompt."""
+        parts = []
+
+        # Objects
+        if detections:
+            obj_parts = []
+            for d in detections[:6]:
+                name  = d.get("class", "object")
+                dist  = d.get("distance", "unknown distance")
+                pos   = d.get("position", "")
+                track = d.get("track_id", "")
+                move  = d.get("movement", {}).get("direction", "")
+                desc  = f"{name} at {dist}"
+                if pos:
+                    desc += f" ({pos})"
+                if move and move not in ("stationary", "new"):
+                    desc += f" [{move}]"
+                obj_parts.append(desc)
+            parts.append("Objects: " + ", ".join(obj_parts))
+
+        # Gestures
+        if gestures:
+            g_parts = [
+                f"{g.get('hand','?')} hand showing {g.get('display_name','?')} "
+                f"({int(g.get('confidence',0)*100)}%)"
+                for g in gestures
+            ]
+            parts.append("Gestures: " + "; ".join(g_parts))
+
+        # Emotions
+        if emotions:
+            e_parts = [
+                f"face {i+1}: {e.get('dominant_emotion','?')} "
+                f"({int(e.get('confidence',0)*100)}%)"
+                for i, e in enumerate(emotions)
+            ]
+            parts.append("Emotions: " + "; ".join(e_parts))
+
+        # Poses
+        if poses:
+            p_parts = [
+                f"person {i+1}: {p.get('display_name','?')} "
+                f"({int(p.get('confidence',0)*100)}%)"
+                + (f", {p['lean']['direction']}" if p.get('lean') else "")
+                for i, p in enumerate(poses)
+            ]
+            parts.append("Poses: " + "; ".join(p_parts))
+
+        return "\n".join(parts)
+
+    def _scene_with_llm(self, detections, gestures, emotions, poses) -> str:
+        """Generate scene description using OpenAI/Groq."""
+        try:
+            context = self._build_scene_context(detections, gestures, emotions, poses)
+            prompt = (
+                "You are a visual AI assistant. Based on the following observations, "
+                "write a single fluent paragraph (2-4 sentences) describing what is happening "
+                "in the scene as if narrating to a person. Be specific about positions, emotions, "
+                "and interactions. Mention safety-relevant items first.\n\n"
+                f"Observations:\n{context}\n\n"
+                "Scene description:"
+            )
+            model = "llama-3.3-70b-versatile" if self.llm_provider == "groq" else "gpt-4o-mini"
+            response = self.llm_client.chat.completions.create(
+                model=model,
+                messages=[{"role": "user", "content": prompt}],
+                max_tokens=120,
+                temperature=0.6,
+            )
+            return response.choices[0].message.content.strip().strip('"\'')
+        except Exception as e:
+            print(f"[LLM Scene] Error: {e}")
+            return self._scene_template(detections, gestures, emotions, poses)
+
+    def _scene_with_gemini(self, detections, gestures, emotions, poses) -> str:
+        """Generate scene description using Gemini."""
+        try:
+            context = self._build_scene_context(detections, gestures, emotions, poses)
+            prompt = (
+                f"Describe this scene in 2-3 natural sentences:\n{context}\nDescription:"
+            )
+            response = self.llm_client.generate_content(prompt)
+            return response.text.strip().strip('"\'')
+        except Exception as e:
+            print(f"[Gemini Scene] Error: {e}")
+            return self._scene_template(detections, gestures, emotions, poses)
+
+    def _scene_template(self, detections, gestures, emotions, poses) -> str:
+        """Template-based scene description fallback."""
+        parts = []
+
+        # Objects summary
+        if detections:
+            obj_names = [d.get("class", "object") for d in detections[:4]]
+            counts: Dict[str, int] = {}
+            for n in obj_names:
+                counts[n] = counts.get(n, 0) + 1
+            obj_str = ", ".join(
+                f"{v} {k}{'s' if v > 1 else ''}" for k, v in counts.items()
+            )
+            parts.append(f"Scene contains: {obj_str}.")
+
+        # Emotions
+        if emotions:
+            dominant = emotions[0].get("dominant_emotion", "neutral")
+            emoji = emotions[0].get("emoji", "")
+            parts.append(f"Person appears {dominant} {emoji}.")
+
+        # Gestures
+        if gestures:
+            g = gestures[0]
+            parts.append(
+                f"{g.get('hand','?')} hand gesture: {g.get('display_name','?')} "
+                f"{g.get('emoji','')}."
+            )
+
+        # Poses
+        if poses:
+            p = poses[0]
+            posture = p.get("display_name", "standing")
+            lean_info = ""
+            if p.get("lean") and p["lean"]["direction"] != "upright":
+                lean_info = f", {p['lean']['direction'].replace('_', ' ')}"
+            parts.append(f"Body posture: {posture}{lean_info}.")
+
+        return " ".join(parts) if parts else "Scene analysis in progress."
+
+
 # Singleton
 _alert_generator = None
 
@@ -277,3 +432,4 @@ def get_alert_generator() -> SmartAlertGenerator:
     if _alert_generator is None:
         _alert_generator = SmartAlertGenerator()
     return _alert_generator
+

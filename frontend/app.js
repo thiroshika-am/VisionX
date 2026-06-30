@@ -348,9 +348,6 @@ function startDetection() {
     
     startOCR();
     startFaceDetection();
-    startGestureDetection();   // NEW
-    startEmotionDetection();   // NEW
-    startSceneAnalysis();      // NEW
 }
 
 function stopDetection() {
@@ -1324,6 +1321,14 @@ async function fetchStatus() {
         if (data.wifi_rssi !== null && data.wifi_rssi !== undefined) {
             if (DOM.statSignal) DOM.statSignal.textContent = `${data.wifi_rssi} dBm`;
         }
+
+        // Speak pending voice announcements from background workers
+        if (data.announcements && data.announcements.length > 0) {
+            data.announcements.forEach(msg => {
+                console.log('[BG ALERT] Speaking:', msg);
+                speak(msg);
+            });
+        }
     } catch (e) {
         console.warn('Status fetch error:', e.message);
         updateCapConnection(false, 'No Connection');
@@ -1375,6 +1380,38 @@ async function fetchGPS() {
             gpsSource.classList.remove('device-gps');
         }
     }
+}
+
+async function fetchFamilySightings() {
+    try {
+        const res = await fetch(`${CONFIG.API_BASE}/api/family/recent`);
+        if (!res.ok) throw new Error(`Family recent status ${res.status}`);
+        const data = await res.json();
+        
+        const listEl = document.getElementById('family-sightings-list');
+        if (!listEl) return;
+        
+        if (!data.sightings || data.sightings.length === 0) {
+            listEl.innerHTML = '<span class="no-text">No sightings logged</span>';
+            return;
+        }
+        
+        listEl.innerHTML = data.sightings.map(s => {
+            return `<div style="display: flex; justify-content: space-between; padding: 0.2rem 0; border-bottom: 1px solid rgba(0,212,255,0.05); font-family: monospace;">
+                <span style="color: var(--primary); font-weight: bold;">${escapeHtml(s.name)}</span>
+                <span style="color: var(--text-secondary);">${s.timestamp.split(' ')[1]}</span>
+                <span style="color: var(--text-muted);">${Math.round(s.confidence * 100)}%</span>
+            </div>`;
+        }).join('');
+    } catch (e) {
+        console.warn('Failed to fetch recent family sightings:', e.message);
+    }
+}
+
+function escapeHtml(text) {
+    const d = document.createElement('div');
+    d.textContent = text;
+    return d.innerHTML;
 }
 
 // ============================================
@@ -2630,7 +2667,26 @@ function updateGestureUI(gestures) {
     emojiEl.classList.add('pulse');
     emojiEl.textContent = g.emoji || '✋';
 
-    if (nameEl) nameEl.textContent = g.display_name || g.gesture;
+    if (nameEl) {
+        const meanings = {
+            "Thumb_Up": "Yes / OK",
+            "thumbs_up": "Yes / OK",
+            "Thumb_Down": "No",
+            "thumbs_down": "No",
+            "Open_Palm": "Stop / Wait",
+            "open_palm": "Stop / Wait",
+            "stop": "Stop / Wait",
+            "Pointing_Up": "Question / Repeat that",
+            "pointing": "Question / Repeat that",
+            "Victory": "Hello / Goodbye",
+            "victory": "Hello / Goodbye",
+            "ILoveYou": "Help / Emergency",
+            "rock_on": "Help / Emergency",
+            "call_me": "Help / Emergency",
+            "fist": "Help / Emergency"
+        };
+        nameEl.textContent = meanings[g.gesture] || g.display_name || g.gesture;
+    }
     if (handEl) handEl.textContent = `${g.hand || '?'} Hand · ${Math.round((g.confidence || 0) * 100)}% confidence`;
     const pct = Math.round((g.confidence || 0) * 100);
     if (fillEl) fillEl.style.width = pct + '%';

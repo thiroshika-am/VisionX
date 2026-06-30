@@ -12,5 +12,47 @@
   "alert_settings": {
     "critical_distance_cm": 50,
     "warning_distance_cm": 100
+  },
+  "modules": {
+    "obstacle_detection": {
+      "enabled": true,
+      "always_on": true
+    },
+    "scene_description": {
+      "enabled": true,
+      "on_demand": true
+    },
+    "ocr_reading": {
+      "enabled": true,
+      "on_demand": true
+    },
+    "currency_detection": {
+      "enabled": true,
+      "on_demand": true
+    },
+    "navigation": {
+      "enabled": true,
+      "routing_api": "http://router.project-osrm.org",
+      "turn_announce_distance_m": 15
+    },
+    "indoor_routes": {
+      "enabled": true
+    },
+    "family_recognition": {
+      "enabled": true,
+      "interval_sec": 1.5,
+      "confidence_threshold": 0.6,
+      "cooldown_sec": 30
+    },
+    "gesture_recognition": {
+      "enabled": true,
+      "interval_sec": 0.5,
+      "hold_duration_sec": 0.5
+    },
+    "sos": {
+      "enabled": true,
+      "webhook_url": "",
+      "contacts": []
+    }
   }
 }

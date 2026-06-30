@@ -51,8 +51,7 @@
             <div class="loading-messages">
                 <div class="message-item">Connecting to sensors...</div>
                 <div class="message-item">Initializing AI model...</div>
-                <div class="message-item">Loading gesture engine...</div>
-                <div class="message-item">Loading emotion & pose AI...</div>
+                <div class="message-item">Loading pose AI...</div>
                 <div class="message-item">Loading dashboard...</div>
             </div>
         </div>
@@ -84,6 +83,14 @@
                             <circle cx="12" cy="7" r="4"/>
                         </svg>
                     </a>
+                    <button class="voice-cmd-btn" id="voice-cmd-btn" title="Voice Command (hold to speak)" aria-label="Voice Command">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                            <line x1="12" y1="19" x2="12" y2="23"/>
+                            <line x1="8" y1="23" x2="16" y2="23"/>
+                        </svg>
+                    </button>
                     <button class="logout-btn" id="logout-btn" title="Logout" aria-label="Logout">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 4l4 4m0 0l-4 4m4-4H9m7 7v2a2 2 0 0 1-2 2h-2"/>
@@ -229,74 +236,8 @@
                     </div>
                 </div>
 
-                <!-- ── GESTURE RECOGNITION PANEL ── -->
-                <div class="panel ai-panel gesture-panel" id="gesture-panel">
-                    <div class="panel-header">
-                        <h3 class="panel-title">✋ Gesture Recognition</h3>
-                        <div class="ai-badge" id="gesture-badge">READY</div>
-                    </div>
-                    <div class="gesture-display" id="gesture-display">
-                        <div class="gesture-emoji" id="gesture-emoji">🤚</div>
-                        <div class="gesture-info">
-                            <span class="gesture-name" id="gesture-name">No Gesture</span>
-                            <span class="gesture-hand" id="gesture-hand">—</span>
-                            <div class="gesture-confidence-bar">
-                                <div class="confidence-fill" id="gesture-conf-fill" style="width:0%"></div>
-                            </div>
-                            <span class="gesture-conf-label" id="gesture-conf-label">0%</span>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- ── EMOTION DETECTION PANEL ── -->
-                <div class="panel ai-panel emotion-panel" id="emotion-panel">
-                    <div class="panel-header">
-                        <h3 class="panel-title">😊 Emotion Detection</h3>
-                        <div class="ai-badge" id="emotion-badge">READY</div>
-                    </div>
-                    <div class="emotion-display" id="emotion-display">
-                        <div class="emotion-emoji" id="emotion-emoji">😐</div>
-                        <div class="emotion-info">
-                            <span class="emotion-label" id="emotion-label">Neutral</span>
-                            <div class="emotion-bars" id="emotion-bars">
-                                <!-- filled by JS -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- ── POSE / BODY LANGUAGE PANEL ── -->
-                <div class="panel ai-panel pose-panel" id="pose-panel">
-                    <div class="panel-header">
-                        <h3 class="panel-title">🧍 Pose Analysis</h3>
-                        <div class="ai-badge" id="pose-badge">READY</div>
-                    </div>
-                    <div class="pose-display" id="pose-display">
-                        <canvas class="pose-canvas" id="pose-canvas" width="80" height="120"></canvas>
-                        <div class="pose-info">
-                            <span class="pose-label" id="pose-label">No Person Detected</span>
-                            <span class="pose-lean" id="pose-lean">—</span>
-                            <div class="pose-confidence-bar">
-                                <div class="confidence-fill" id="pose-conf-fill" style="width:0%"></div>
-                            </div>
-                            <span class="pose-conf-label" id="pose-conf-label">0%</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ── SCENE INTELLIGENCE PANEL ── -->
-                <div class="panel ai-panel scene-panel" id="scene-panel">
-                    <div class="panel-header">
-                        <h3 class="panel-title">🌐 Scene Intelligence</h3>
-                        <div class="scene-refresh-timer" id="scene-timer">5s</div>
-                    </div>
-                    <div class="scene-description" id="scene-description">
-                        <div class="scene-placeholder">
-                            <div class="scene-spinner"></div>
-                            <span>Analyzing scene...</span>
-                        </div>
-                    </div>
-                </div>
 
                 <div class="panel status-panel">
                     <div class="panel-header">

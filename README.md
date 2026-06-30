@@ -89,6 +89,13 @@ See [TODO.md](TODO.md) for the full project roadmap.
 
 ---
 
+## 🔒 Biometric Data & Privacy Policy
+
+VisionX values the user's privacy and takes biometric data security very seriously:
+- **Local Storage Only**: All face photographs and mathematical face encodings (embeddings) are processed and stored strictly on the local backend computer (inside the `config/known_faces` directory and `config/known_faces.json` database).
+- **No Cloud Uploads**: Biometric data is never transmitted to the cloud, external database servers, or third-party service providers.
+- **Caregiver Control**: The caregiver has full control over the enrolled gallery of known faces. People can be added or deleted at any time directly through the local "Known Faces" settings panel.
+
 ## 📜 License
 
 MIT License — Open source for accessibility.

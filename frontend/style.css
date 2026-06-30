@@ -3048,6 +3048,41 @@ textarea {
     transform: scale(0.95);
 }
 
+.voice-cmd-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.15) 0%, rgba(124, 58, 237, 0.1) 100%);
+    border: 2px solid rgba(0, 212, 255, 0.4);
+    border-radius: 12px;
+    color: var(--primary);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(0, 212, 255, 0.15);
+}
+
+.voice-cmd-btn:hover {
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.25) 0%, rgba(124, 58, 237, 0.2) 100%);
+    transform: scale(1.08);
+    box-shadow: 0 6px 20px rgba(0, 212, 255, 0.35);
+    border-color: rgba(0, 212, 255, 0.6);
+}
+
+.voice-cmd-btn.listening {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.3) 0%, rgba(255, 100, 100, 0.2) 100%);
+    border-color: rgba(239, 68, 68, 0.7);
+    color: #ff6464;
+    animation: voice-pulse 1.2s ease-in-out infinite;
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+}
+
+@keyframes voice-pulse {
+    0%, 100% { box-shadow: 0 0 12px rgba(239, 68, 68, 0.3); }
+    50% { box-shadow: 0 0 28px rgba(239, 68, 68, 0.6); }
+}
+
 .logout-btn:hover {
     background: linear-gradient(135deg, rgba(239, 68, 68, 0.25) 0%, rgba(220, 38, 38, 0.2) 100%);
     transform: scale(1.08);

@@ -94,6 +94,7 @@ unsigned long measureDistance();
 void updateVibrationAlert(AlertLevel level);
 void handleBackendCommand();
 void handleStream();
+void handleVibrateCommand();
 void sendHeartbeat();
 String buildSensorDataPacket();
 void logToSerial(const char *message);
@@ -355,6 +356,7 @@ void initWiFi() {
   server.on("/distance", handleDistance);
   server.on("/frame", handleFrame);
   server.on("/stream", handleStream); // ← MJPEG live stream
+  server.on("/vibrate", handleVibrateCommand);
   server.begin();
   Serial.printf("HTTP server started at http://%s:80\n",
                 WiFi.localIP().toString().c_str());
@@ -510,6 +512,94 @@ void handleStream() {
     // ~10 FPS
     delay(100);
   }
+}
+
+// ============================================
+// HTTP HANDLER - VIBRATE ENDPOINT
+// ============================================
+void handleVibrateCommand() {
+  if (!server.hasArg("pattern")) {
+    server.send(400, "text/plain", "Missing pattern argument");
+    return;
+  }
+
+  String pattern = server.arg("pattern");
+  Serial.printf("Received vibration request: %s\n", pattern.c_str());
+
+  if (pattern == "obstacle_critical") {
+    // Continuous high-frequency vibration
+    ledcWrite(0, 255);
+    delay(500);
+    ledcWrite(0, 0);
+  } else if (pattern == "obstacle_warning") {
+    // 3 quick pulses
+    for (int i = 0; i < 3; i++) {
+      ledcWrite(0, 200);
+      delay(100);
+      ledcWrite(0, 0);
+      delay(100);
+    }
+  } else if (pattern == "family_nearby") {
+    // 2 gentle, long pulses (lower intensity: 150)
+    for (int i = 0; i < 2; i++) {
+      ledcWrite(0, 150);
+      delay(300);
+      ledcWrite(0, 0);
+      delay(200);
+    }
+  } else if (pattern == "gesture_confirm") {
+    // Triple-tap confirmation pulse
+    for (int i = 0; i < 3; i++) {
+      ledcWrite(0, 200);
+      delay(70);
+      ledcWrite(0, 0);
+      delay(50);
+    }
+  } else if (pattern == "turn_left") {
+    // 2 short left-weighted pulses (lower intensity = "soft" directional cue)
+    for (int i = 0; i < 2; i++) {
+      ledcWrite(0, 140);
+      delay(120);
+      ledcWrite(0, 0);
+      delay(80);
+    }
+  } else if (pattern == "turn_right") {
+    // 2 short right-weighted pulses (higher intensity = "strong" directional cue)
+    for (int i = 0; i < 2; i++) {
+      ledcWrite(0, 220);
+      delay(120);
+      ledcWrite(0, 0);
+      delay(80);
+    }
+  } else if (pattern == "arrived") {
+    // Double-pulse confirmation: two medium buzzes
+    ledcWrite(0, 180);
+    delay(200);
+    ledcWrite(0, 0);
+    delay(150);
+    ledcWrite(0, 180);
+    delay(200);
+    ledcWrite(0, 0);
+  } else if (pattern == "nav_alert") {
+    // Single medium pulse for upcoming turn
+    ledcWrite(0, 160);
+    delay(250);
+    ledcWrite(0, 0);
+  } else if (pattern == "sos_active") {
+    // Repeating SOS pattern: 3 short, 3 long, 3 short
+    for (int i = 0; i < 3; i++) { ledcWrite(0, 255); delay(100); ledcWrite(0, 0); delay(80); }
+    delay(100);
+    for (int i = 0; i < 3; i++) { ledcWrite(0, 255); delay(300); ledcWrite(0, 0); delay(100); }
+    delay(100);
+    for (int i = 0; i < 3; i++) { ledcWrite(0, 255); delay(100); ledcWrite(0, 0); delay(80); }
+  } else if (pattern == "stop") {
+    ledcWrite(0, 0);
+  } else {
+    server.send(400, "text/plain", "Unknown pattern: " + pattern);
+    return;
+  }
+
+  server.send(200, "application/json", "{\"status\":\"ok\",\"pattern\":\"" + pattern + "\"}");
 }
 
 // ============================================

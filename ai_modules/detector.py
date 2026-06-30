@@ -15,8 +15,9 @@ import time
 from typing import Dict, List, Tuple, Optional
 from ultralytics import YOLO
 
-# Store model in workspace root
-MODEL_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# Store models in config/models
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+MODEL_DIR = os.path.join(BASE_DIR, "config", "models")
 
 # Use YOLOv8l (large) for high accuracy. Falls back to yolov8n if l not present.
 MODEL_PATH_L = os.path.join(MODEL_DIR, "yolov8l.pt")

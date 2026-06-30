@@ -12,12 +12,15 @@ import logging
 import threading
 import hashlib
 import secrets
+import base64
+import cv2
+import numpy as np
 from datetime import datetime, timezone
 from flask import Flask, Response, jsonify, send_from_directory, request, abort
 from flask_cors import CORS
 import requests
 
-# Import AI detector
+# Import AI modules
 import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from ai_modules.detector import get_detector
@@ -27,6 +30,8 @@ from ai_modules.face_recognition_engine import get_face_engine
 from ai_modules.gesture_engine import get_gesture_engine
 from ai_modules.emotion_engine import get_emotion_engine
 from ai_modules.pose_engine import get_pose_engine
+from ai_modules.voice_commander import get_voice_commander
+from ai_modules.scheduler import get_scheduler, Priority
 
 # ============================================
 # CONFIGURATION
@@ -41,6 +46,20 @@ ESP32_STREAM_URL = config.get("esp32", {}).get("stream_url", "http://192.168.1.1
 ESP32_STATUS_URL = config.get("esp32", {}).get("status_url", "http://192.168.1.100:80/status")
 ESP32_DISTANCE_URL = config.get("esp32", {}).get("distance_url", "http://192.168.1.100:80/distance")
 BACKEND_PORT = config.get("network", {}).get("backend_port", 5000)
+
+# Module configs (new structure)
+MODULES = config.get("modules", {})
+FAMILY_CONFIG = MODULES.get("family_recognition", {
+    "enabled": True,
+    "confidence_threshold": 0.6,
+    "cooldown_sec": 30,
+    "interval_sec": 1.5
+})
+GESTURE_CONFIG = MODULES.get("gesture_recognition", {
+    "enabled": True,
+    "hold_duration_sec": 0.5,
+    "interval_sec": 0.5
+})
 
 # ============================================
 # LOGGING
@@ -81,6 +100,206 @@ device_status = {
 
 gps_lock = threading.Lock()
 status_lock = threading.Lock()
+
+# Latest raw image frame received from client (base64)
+latest_frame_data = None
+frame_lock = threading.Lock()
+
+# Cached AI results
+latest_faces_result = {"faces": [], "count": 0}
+latest_gesture_result = {"gestures": [], "count": 0}
+ai_results_lock = threading.Lock()
+
+# Sighting logs
+family_recent_sightings = []  # List of {name, timestamp, confidence}
+sightings_lock = threading.Lock()
+
+latest_debounced_gesture = {
+    "gesture": "None",
+    "display_name": "No Gesture",
+    "meaning": "No Gesture",
+    "confidence": 0.0,
+    "timestamp": None
+}
+gesture_lock = threading.Lock()
+
+# Pending browser announcements (TTS messages)
+pending_announcements = []
+announcements_lock = threading.Lock()
+
+# Cooldown & hold states
+last_face_announcements = {}  # name -> timestamp
+gesture_hold_state = {
+    "gesture": None,
+    "first_seen": None,
+    "last_fired": 0
+}
+
+# Gesture translations
+GESTURE_MEANINGS = {
+    "Thumb_Up": "Yes / OK",
+    "thumbs_up": "Yes / OK",
+    "Thumb_Down": "No",
+    "thumbs_down": "No",
+    "Open_Palm": "Stop / Wait",
+    "open_palm": "Stop / Wait",
+    "stop": "Stop / Wait",
+    "Pointing_Up": "Question / Repeat that",
+    "pointing": "Question / Repeat that",
+    "Victory": "Hello / Goodbye",
+    "victory": "Hello / Goodbye",
+    "ILoveYou": "Help / Emergency",
+    "rock_on": "Help / Emergency",
+    "call_me": "Help / Emergency",
+    "fist": "Help / Emergency"
+}
+
+def decode_base64_to_frame(image_b64):
+    try:
+        if "," in image_b64:
+            image_b64 = image_b64.split(",")[1]
+        img_bytes = base64.b64decode(image_b64)
+        img_array = np.frombuffer(img_bytes, dtype=np.uint8)
+        return cv2.imdecode(img_array, cv2.IMREAD_COLOR)
+    except Exception as e:
+        logger.error(f"Error decoding base64 image: {e}")
+        return None
+
+def add_pending_announcement(text):
+    with announcements_lock:
+        pending_announcements.append(text)
+
+def get_and_clear_pending_announcements():
+    with announcements_lock:
+        res = list(pending_announcements)
+        pending_announcements.clear()
+        return res
+
+def trigger_esp32_vibration(pattern):
+    def run():
+        try:
+            esp_ip = config.get("esp32", {}).get("stream_url", "").split("/")[2].split(":")[0]
+            if esp_ip:
+                url = f"http://{esp_ip}:80/vibrate?pattern={pattern}"
+                logger.info(f"Sending vibration command to ESP32: {url}")
+                requests.get(url, timeout=2)
+        except Exception as e:
+            logger.warning(f"Failed to send vibration command to ESP32: {e}")
+    threading.Thread(target=run, daemon=True).start()
+
+def background_ai_worker():
+    global latest_frame_data, latest_faces_result, latest_gesture_result, latest_debounced_gesture
+    logger.info("Background AI Worker thread started")
+    
+    last_face_run = 0
+    last_gesture_run = 0
+    
+    # Interval controls
+    face_interval = 1.5      # seconds
+    gesture_interval = 0.5   # seconds
+    
+    while True:
+        try:
+            time.sleep(0.05)
+            
+            image_b64 = None
+            with frame_lock:
+                if latest_frame_data is not None:
+                    image_b64 = latest_frame_data
+                    latest_frame_data = None
+            
+            if image_b64 is None:
+                continue
+                
+            frame = decode_base64_to_frame(image_b64)
+            if frame is None:
+                continue
+                
+            now = time.time()
+            
+            # --- Face Recognition ---
+            if FAMILY_CONFIG.get("enabled", True) and (now - last_face_run >= face_interval):
+                last_face_run = now
+                try:
+                    engine = get_face_engine()
+                    result = engine.detect(frame)
+                    
+                    with ai_results_lock:
+                        latest_faces_result = result
+                        
+                    faces = result.get("faces", [])
+                    conf_threshold = FAMILY_CONFIG.get("confidence_threshold", 0.6)
+                    for face in faces:
+                        if face.get("is_known") and face.get("confidence", 0) >= conf_threshold:
+                            name = face["name"]
+                            cooldown_sec = FAMILY_CONFIG.get("announce_cooldown_sec", 30)
+                            last_seen = last_face_announcements.get(name, 0)
+                            if now - last_seen >= cooldown_sec:
+                                face["should_announce"] = True
+                                last_face_announcements[name] = now
+                                
+                                with sightings_lock:
+                                    sighting = {
+                                        "name": name,
+                                        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                                        "confidence": face["confidence"]
+                                    }
+                                    family_recent_sightings.insert(0, sighting)
+                                    if len(family_recent_sightings) > 50:
+                                        family_recent_sightings.pop()
+                                
+                                logger.info(f"[BG-AI] Family member matched: {name} ({face['confidence']})")
+                                trigger_esp32_vibration("family_nearby")
+                except Exception as ex:
+                    logger.error(f"Background Face Recognition failed: {ex}")
+            
+            # --- Gesture Recognition ---
+            if GESTURE_CONFIG.get("enabled", True) and (now - last_gesture_run >= gesture_interval):
+                last_gesture_run = now
+                try:
+                    engine = get_gesture_engine()
+                    result = engine.detect(frame)
+                    
+                    with ai_results_lock:
+                        latest_gesture_result = result
+                        
+                    gestures = result.get("gestures", [])
+                    if gestures:
+                        g = gestures[0]
+                        gesture_name = g["gesture"]
+                        confidence = g["confidence"]
+                        hold_duration = GESTURE_CONFIG.get("hold_duration_sec", 0.5)
+                        
+                        if gesture_hold_state["gesture"] == gesture_name:
+                            first_seen = gesture_hold_state["first_seen"]
+                            if first_seen and (now - first_seen >= hold_duration):
+                                if now - gesture_hold_state["last_fired"] > 2.0:
+                                    gesture_hold_state["last_fired"] = now
+                                    meaning = GESTURE_MEANINGS.get(gesture_name, "Unknown Gesture")
+                                    
+                                    with gesture_lock:
+                                        latest_debounced_gesture = {
+                                            "gesture": gesture_name,
+                                            "display_name": g.get("display_name", gesture_name),
+                                            "meaning": meaning,
+                                            "confidence": confidence,
+                                            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                                        }
+                                    
+                                    logger.info(f"[BG-AI] Gesture debounced & fired: {gesture_name} -> {meaning}")
+                                    trigger_esp32_vibration("gesture_confirm")
+                                    add_pending_announcement(f"User is signaling: {meaning}")
+                        else:
+                            gesture_hold_state["gesture"] = gesture_name
+                            gesture_hold_state["first_seen"] = now
+                    else:
+                        gesture_hold_state["gesture"] = None
+                        gesture_hold_state["first_seen"] = None
+                except Exception as ex:
+                    logger.error(f"Background Gesture Recognition failed: {ex}")
+                    
+        except Exception as e:
+            logger.error(f"Error in background AI worker: {e}", exc_info=True)
 
 # ============================================
 # FLASK APP
@@ -161,7 +380,9 @@ def update_gps():
 def get_status():
     """Return device status."""
     with status_lock:
-        return jsonify(device_status)
+        status_copy = dict(device_status)
+    status_copy["announcements"] = get_and_clear_pending_announcements()
+    return jsonify(status_copy)
 
 
 @app.route("/api/status", methods=["POST"])
@@ -322,6 +543,161 @@ def health():
     return jsonify({"status": "ok", "time": datetime.now(timezone.utc).isoformat()})
 
 
+# --- Voice Command Dispatcher ---
+
+@app.route("/api/voice/command", methods=["POST"])
+def handle_voice_command():
+    """
+    Receive a voice command transcript from the frontend and dispatch it.
+    Expected JSON: { "transcript": "what's around me" }
+    Returns: { "action": str, "params": dict, "result": str, "speak": str }
+    """
+    try:
+        data = request.get_json(force=True)
+        transcript = data.get("transcript", "").strip()
+
+        if not transcript:
+            return jsonify({"error": "No transcript provided", "action": "unknown"}), 400
+
+        commander = get_voice_commander()
+        parsed = commander.parse(transcript)
+        action = parsed["action"]
+        params = parsed.get("params", {})
+
+        result_text = ""
+        speak_text = ""
+
+        if action == "scene_describe":
+            speak_text = "Scene description is not yet available. It will be added in Phase 2."
+            result_text = speak_text
+
+        elif action == "ocr_read":
+            # Use current frame for OCR
+            image_b64 = None
+            with frame_lock:
+                image_b64 = latest_frame_data
+            if image_b64:
+                reader = get_ocr_reader()
+                ocr_result = reader.read_from_base64(image_b64)
+                texts = ocr_result.get("texts", [])
+                if texts:
+                    combined = " ".join(t.get("text", "") for t in texts)
+                    speak_text = f"I can read: {combined}"
+                    result_text = combined
+                else:
+                    speak_text = "I don't see any text right now."
+                    result_text = "No text detected"
+            else:
+                speak_text = "No camera frame available."
+                result_text = speak_text
+
+        elif action == "location_query":
+            with gps_lock:
+                lat = gps_data.get("latitude")
+                lng = gps_data.get("longitude")
+                source = gps_data.get("source", "unknown")
+            if source != "placeholder" and lat and lng:
+                speak_text = f"Your coordinates are {lat:.4f}, {lng:.4f}."
+                result_text = f"Lat: {lat:.6f}, Lng: {lng:.6f}"
+            else:
+                speak_text = "GPS location is not available yet."
+                result_text = speak_text
+
+        elif action == "face_scan":
+            speak_text = "Scanning for faces nearby."
+            result_text = "Face scan triggered"
+            # Force an immediate face recognition cycle
+            with ai_results_lock:
+                faces = latest_faces_result.get("faces", [])
+                known = [f for f in faces if f.get("is_known")]
+                if known:
+                    names = ", ".join(f["name"] for f in known)
+                    speak_text = f"I can see: {names}"
+                    result_text = f"Recognized: {names}"
+                else:
+                    speak_text = "I don't recognize anyone nearby right now."
+
+        elif action == "nav_start":
+            destination = params.get("destination", "")
+            speak_text = f"Navigation to {destination} is not yet available. It will be added in Phase 3."
+            result_text = speak_text
+
+        elif action == "nav_stop":
+            speak_text = "Navigation stopped."
+            result_text = speak_text
+
+        elif action == "currency_detect":
+            image_b64 = None
+            with frame_lock:
+                image_b64 = latest_frame_data
+            if image_b64:
+                try:
+                    from ai_modules.currency_detector import get_currency_detector
+                    detector = get_currency_detector()
+                    curr_result = detector.detect_from_base64(image_b64)
+                    if curr_result.get("detected"):
+                        denomination = curr_result.get("denomination", "unknown")
+                        speak_text = f"This looks like a {denomination} rupee note."
+                        result_text = f"₹{denomination}"
+                    else:
+                        speak_text = "I can't identify a currency note. Try holding it closer."
+                        result_text = "No currency detected"
+                except Exception as ex:
+                    speak_text = "Currency detection encountered an error."
+                    result_text = str(ex)
+            else:
+                speak_text = "No camera frame available."
+                result_text = speak_text
+
+        elif action == "object_identify":
+            speak_text = "Object identification is not yet available. It will be added in Phase 2."
+            result_text = speak_text
+
+        elif action == "sos_trigger":
+            speak_text = "SOS triggered. Emergency contacts will be notified."
+            result_text = "SOS activated"
+            trigger_esp32_vibration("sos_active")
+
+        else:
+            help_text = commander.get_help_text()
+            speak_text = f"I didn't understand that command. {help_text}"
+            result_text = "Unknown command"
+
+        # Queue announcement for TTS
+        if speak_text:
+            add_pending_announcement(speak_text)
+
+        logger.info(f"[VoiceCmd] '{transcript}' → {action}: {result_text}")
+
+        return jsonify({
+            "action": action,
+            "params": params,
+            "result": result_text,
+            "speak": speak_text,
+            "transcript": transcript
+        })
+
+    except Exception as e:
+        logger.error(f"Voice command error: {e}", exc_info=True)
+        return jsonify({"error": str(e), "action": "error"}), 500
+
+
+# --- Scheduler Status ---
+
+@app.route("/api/scheduler/status", methods=["GET"])
+def scheduler_status():
+    """Return the current scheduler stats and active modules."""
+    try:
+        scheduler = get_scheduler()
+        stats = scheduler.get_stats()
+        stats["active_modules"] = {
+            name: mod.get("enabled", False)
+            for name, mod in MODULES.items()
+        }
+        return jsonify(stats)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 # --- API: Object Detection ---
 
 @app.route("/api/detect", methods=["POST"])
@@ -339,6 +715,11 @@ def detect_objects():
         if not image_b64:
             logger.warning("No image data in request")
             return jsonify({"error": "No image provided", "detections": [], "count": 0}), 400
+        
+        # Update latest frame for background processing
+        global latest_frame_data
+        with frame_lock:
+            latest_frame_data = image_b64
         
         logger.info(f"Image data received, length: {len(image_b64)}")
         logger.info("Loading detector...")
@@ -497,29 +878,47 @@ def get_face_photo(person_id):
 
 @app.route("/api/face-detect", methods=["POST"])
 def detect_faces():
-    """Detect and recognize faces in an image.
-    Expected JSON: { "image": "base64_image" }
-    """
+    """Detect and recognize faces in an image (returns cached results)."""
     try:
         data = request.get_json(force=True)
         image_b64 = data.get("image")
 
-        if not image_b64:
-            return jsonify({"error": "No image provided", "faces": []}), 400
+        if image_b64:
+            global latest_frame_data
+            with frame_lock:
+                latest_frame_data = image_b64
 
-        engine = get_face_engine()
-        result = engine.detect_from_base64(image_b64)
-
-        known = [f for f in result.get("faces", []) if f.get("is_known")]
-        if known:
-            names = ", ".join(f["name"] for f in known)
-            logger.info(f"Recognized: {names}")
-
-        return jsonify(result)
+        with ai_results_lock:
+            return jsonify(latest_faces_result)
 
     except Exception as e:
         logger.error(f"Face detect error: {e}", exc_info=True)
-        return jsonify({\"error\": str(e), \"faces\": []}), 500
+        return jsonify({"error": str(e), "faces": []}), 500
+
+
+# --- API: Family Recognition Endpoints ---
+
+@app.route("/api/family/enroll", methods=["POST"])
+def enroll_family_member():
+    """Enroll a new family member (delegates to add_face)."""
+    return add_face()
+
+
+@app.route("/api/family/recent", methods=["GET"])
+def get_recent_family_sightings():
+    """Get the log of recent family sightings."""
+    with sightings_lock:
+        return jsonify({
+            "sightings": family_recent_sightings,
+            "count": len(family_recent_sightings)
+        })
+
+
+@app.route("/api/gesture/latest", methods=["GET"])
+def get_latest_gesture():
+    """Get the most recent debounced gesture and translation."""
+    with gesture_lock:
+        return jsonify(latest_debounced_gesture)
 
 
 # ============================================
@@ -528,25 +927,19 @@ def detect_faces():
 
 @app.route("/api/gesture", methods=["POST"])
 def detect_gesture():
-    """
-    Detect hand gestures in an image using MediaPipe.
-    Expected JSON: { "image": "base64_image" }
-    Returns: { "gestures": [...], "count": int }
-    """
+    """Detect hand gestures in an image (returns cached results)."""
     try:
         data = request.get_json(force=True)
         image_b64 = data.get("image")
-        if not image_b64:
-            return jsonify({"error": "No image provided", "gestures": []}), 400
 
-        engine = get_gesture_engine()
-        result = engine.detect_from_base64(image_b64)
+        if image_b64:
+            global latest_frame_data
+            with frame_lock:
+                latest_frame_data = image_b64
 
-        if result.get("gestures"):
-            names = ", ".join(g["gesture"] for g in result["gestures"])
-            logger.info(f"[Gesture] Detected: {names}")
+        with ai_results_lock:
+            return jsonify(latest_gesture_result)
 
-        return jsonify(result)
     except Exception as e:
         logger.error(f"Gesture detection error: {e}", exc_info=True)
         return jsonify({"error": str(e), "gestures": []}), 500
@@ -759,6 +1152,10 @@ def main():
     # Start watchdog thread
     watchdog = threading.Thread(target=device_watchdog, daemon=True)
     watchdog.start()
+
+    # Start background AI worker thread
+    ai_thread = threading.Thread(target=background_ai_worker, daemon=True)
+    ai_thread.start()
 
     app.run(host="0.0.0.0", port=BACKEND_PORT, debug=False, threaded=True)
 

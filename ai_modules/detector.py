@@ -1,9 +1,9 @@
 """
 YOLO Object Detection Module for VisionX
-Detects obstacles and objects from webcam frames
-Uses ultralytics YOLOv8l (large) for high-accuracy detection
-GPU-accelerated with CUDA for maximum performance
-Includes BoT-SORT multi-object tracking
+Detects obstacles and objects from ESP32-CAM / webcam frames.
+Model priority: yolo11n (fastest, Pi-compatible) → yolo11s → yolov8n (fallback)
+GPU-accelerated when CUDA is available; falls back to CPU automatically.
+Includes IoU-based multi-object tracking with approach velocity.
 """
 
 import os
@@ -19,10 +19,18 @@ from ultralytics import YOLO
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MODEL_DIR = os.path.join(BASE_DIR, "config", "models")
 
-# Use YOLOv8l (large) for high accuracy. Falls back to yolov8n if l not present.
-MODEL_PATH_L = os.path.join(MODEL_DIR, "yolov8l.pt")
-MODEL_PATH_N = os.path.join(MODEL_DIR, "yolov8n.pt")
-MODEL_PATH = MODEL_PATH_L  # yolov8l auto-downloads on first run
+# Model priority: YOLO11n (fastest/Pi-ready) → YOLO11s → YOLOv8n fallback
+# ultralytics 8.3+ supports YOLO11 natively. The API is identical.
+MODEL_YOLO11N = os.path.join(MODEL_DIR, "yolo11n.pt")
+MODEL_YOLO11S = os.path.join(MODEL_DIR, "yolo11s.pt")
+MODEL_YOLOV8N = os.path.join(MODEL_DIR, "yolov8n.pt")
+
+# Auto-select: prefer 11n unless 11s already exists
+if os.path.exists(MODEL_YOLO11S):
+    MODEL_PATH = MODEL_YOLO11S
+else:
+    MODEL_PATH = MODEL_YOLO11N  # downloads on first run (~6 MB)
+MODEL_PATH_N = MODEL_YOLOV8N   # kept for backward compat
 
 # Auto-detect GPU
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -66,23 +74,23 @@ class ObjectDetector:
     
     def _load_model(self):
         """Load YOLO model — downloads automatically if not present."""
+        model_name = os.path.basename(MODEL_PATH)
         try:
-            print(f"Device: {DEVICE.upper()} {'(GPU Accelerated)' if DEVICE == 'cuda' else '(CPU Mode)'}")
+            print(f"[Detector] Device: {DEVICE.upper()} {'(GPU)' if DEVICE == 'cuda' else '(CPU)'}")
             if DEVICE == 'cuda':
-                print(f"GPU: {torch.cuda.get_device_name(0)}")
-            # YOLOv8l for maximum accuracy (auto-downloads ~87MB on first run)
-            print(f"Loading YOLOv8l (large) model...")
-            self.model = YOLO(MODEL_PATH)  # auto-downloads yolov8l.pt
+                print(f"[Detector] GPU: {torch.cuda.get_device_name(0)}")
+            print(f"[Detector] Loading {model_name}...")
+            self.model = YOLO(MODEL_PATH)   # auto-downloads on first run
             self.model.to(DEVICE)
-            print(f"YOLOv8l loaded on {'GPU' if DEVICE == 'cuda' else 'CPU'}")
+            print(f"[Detector] {model_name} ready on {DEVICE.upper()}")
         except Exception as e:
-            print(f"Error loading YOLOv8l, trying fallback to yolov8n: {e}")
+            print(f"[Detector] Error loading {model_name}: {e} — trying yolov8n fallback")
             try:
                 self.model = YOLO(MODEL_PATH_N)
                 self.model.to(DEVICE)
-                print("Fallback: YOLOv8n loaded")
+                print("[Detector] Fallback yolov8n loaded")
             except Exception as e2:
-                print(f"Error loading fallback model: {e2}")
+                print(f"[Detector] Fatal: could not load any model: {e2}")
                 raise
     
     def _calculate_iou(self, box1: Dict, box2: Dict) -> float:

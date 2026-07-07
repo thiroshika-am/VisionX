@@ -16,7 +16,32 @@
   "modules": {
     "obstacle_detection": {
       "enabled": true,
-      "always_on": true
+      "always_on": true,
+      "model": "yolo11n.pt",
+      "confidence_threshold": 0.45
+    },
+    "depth_estimation": {
+      "enabled": true,
+      "model": "midas_small.onnx",
+      "on_demand": false
+    },
+    "fall_detection": {
+      "enabled": true,
+      "interval_sec": 2.0,
+      "alert_cooldown_sec": 10
+    },
+    "smart_prioritizer": {
+      "enabled": true,
+      "context_window_sec": 60,
+      "announce_cooldown_sec": 12
+    },
+    "emotion_detection": {
+      "enabled": true,
+      "interval_sec": 2.0
+    },
+    "pose_estimation": {
+      "enabled": true,
+      "interval_sec": 1.5
     },
     "scene_description": {
       "enabled": true,
@@ -48,6 +73,10 @@
       "enabled": true,
       "interval_sec": 0.5,
       "hold_duration_sec": 0.5
+    },
+    "system_monitor": {
+      "enabled": true,
+      "poll_interval_sec": 5
     },
     "sos": {
       "enabled": true,

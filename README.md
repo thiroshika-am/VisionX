@@ -1,101 +1,116 @@
-# 🧢 Smart AI Cap — Blind Obstacle Detection System
+# VisionX — AI Wearable Assistant for the Visually Impaired
 
-> A wearable smart cap for visually impaired users, featuring real-time obstacle detection via ESP32-CAM and GPS location tracking.
+<div align="center">
 
----
+![VisionX](https://img.shields.io/badge/VisionX-AI%20Wearable-00D4FF?style=for-the-badge)
+![Python](https://img.shields.io/badge/Python-3.10+-blue?style=for-the-badge&logo=python)
+![Flask](https://img.shields.io/badge/Flask-3.0-black?style=for-the-badge&logo=flask)
+![YOLO](https://img.shields.io/badge/YOLO-v11n-purple?style=for-the-badge)
+![MediaPipe](https://img.shields.io/badge/MediaPipe-0.10-red?style=for-the-badge)
 
-## 📂 Project Structure
+**Real-time AI-powered wearable assistant that helps visually impaired people understand their surroundings through computer vision and speech.**
 
-```
-blind_obstacle-_dection/
-├── backend/
-│   └── main.py              # Flask backend — API + frontend server
-├── config/
-│   ├── backend_config.json   # ESP32 URLs, network settings
-│   └── requirements.txt      # Python dependencies
-├── firmware/
-│   └── esp32_main.cpp        # ESP32-CAM firmware (Arduino)
-├── frontend/
-│   ├── index.html            # Dashboard UI
-│   ├── style.css             # Glassmorphism dark theme
-│   └── app.js                # Live camera + GPS map logic
-├── TODO.md                   # Project roadmap & checklist
-└── README.md                 # This file
-```
+</div>
 
 ---
 
-## 🚀 Quick Start
+## Architecture
 
-### 1. Install Python Dependencies
+```
+ESP32-CAM ──MJPEG──► Flask Backend ──► AI Modules ──► Frontend Dashboard
+```
+
+**14 AI modules** running on a priority scheduler — from YOLO object detection to depth estimation, face recognition, gesture, emotion, OCR, and fall detection.
+
+## Features
+
+| Feature | Technology |
+|---------|-----------|
+| 🎯 Object Detection | YOLO11n (20-30 FPS on Pi 5) |
+| 🌊 Depth Estimation | MiDaS_small ONNX |
+| 👤 Face Recognition | YuNet + SFace (offline) |
+| ✋ Gesture Recognition | MediaPipe GestureRecognizer |
+| 😊 Emotion Detection | FER / OpenCV DNN |
+| 🧘 Pose Estimation | MediaPipe PoseLandmarker |
+| 📝 OCR | EasyOCR (multilingual) |
+| 🌍 Scene Description | LLM (Groq → Gemini → Template) |
+| 🎤 Voice Commands | Web Speech API |
+| 🆘 Fall Detection | Pose + YOLO bbox analysis |
+| 🧠 Smart Prioritizer | Context memory, cooldowns |
+| 📍 GPS | Browser Geolocation + ESP32 |
+| 💵 Currency Detection | Custom CNN |
+| 📊 System Monitor | psutil + real-time FPS |
+
+## Quick Start
 
 ```bash
+# 1. Install dependencies
 pip install -r config/requirements.txt
+
+# 2. Run backend
+python backend/main.py
+
+# 3. Open dashboard
+# http://localhost:5000
 ```
 
-### 2. Configure ESP32 IP
+## Hardware (Wearable Build)
 
-Edit `config/backend_config.json` and set your ESP32's IP address:
+- **Raspberry Pi 5** (4 GB) — main AI compute
+- **ESP32-CAM** (AI-Thinker, 160° lens) — camera + WiFi stream
+- **HC-SR04** ultrasonic sensor (wired to ESP32)
+- **Haptic motor** (vibration feedback via ESP32 GPIO)
+- **Bone conduction headphones** — audio feedback
+- **10 000 mAh** USB-C power bank — 6+ hours runtime
 
-```json
-{
-  "esp32": {
-    "stream_url": "http://<ESP32_IP>:80/stream",
-    "status_url": "http://<ESP32_IP>:80/status",
-    "distance_url": "http://<ESP32_IP>:80/distance"
-  }
-}
+## Dashboard Tabs
+
+| Tab | Description |
+|-----|-------------|
+| 👁 **Live** | Camera feed with detection overlay, scene description, voice shortcuts |
+| 🎯 **Detections** | Detection history grid with priority/distance/emotion/pose |
+| 🎤 **Voice** | Voice command interface, TTS controls, command history |
+| 🗺 **Map** | GPS map (Leaflet), device status panel |
+| 👤 **Faces** | Known faces enrolment and recent sightings |
+| ⚡ **System** | CPU/RAM/GPU gauges, FPS counter, AI module status, event log |
+
+## Voice Commands
+
+| Say | Action |
+|-----|--------|
+| "What's around me?" | Full scene description |
+| "Read this" | OCR the current frame |
+| "Who is near me?" | Face recognition scan |
+| "Where am I?" | Read GPS coordinates |
+| "What bill is this?" | Currency identification |
+| "Help" / "SOS" | Emergency alert + vibration |
+
+## Project Structure
+
+```
+VisionX/
+├── backend/
+│   ├── main.py              # Slim Flask entry point
+│   ├── state.py             # Shared mutable state
+│   ├── routes/              # Flask Blueprints (5 files)
+│   └── workers/             # Background AI + watchdog
+├── ai_modules/              # All AI engines (preserved + upgraded)
+├── src/
+│   ├── ai/                  # New: depth, fall, prioritizer, scene
+│   └── core/                # New: system_monitor, logger
+├── frontend/                # Premium 5-tab glassmorphism dashboard
+├── config/                  # backend_config.json, requirements.txt
+├── docs/                    # ARCHITECTURE, INSTALL, API, DEMO_SCRIPT
+├── tests/                   # pytest test suite
+└── logs/                    # JSONL structured logs (auto-created)
 ```
 
-### 3. Run the Backend
+## Run Tests
 
 ```bash
-python backend/main.py
+pytest tests/ -v                          # fast tests only
+VISIONX_FULL_TESTS=1 pytest tests/ -v    # include slow OCR test
 ```
 
-### 4. Open the Dashboard
-
-Open your browser at **http://localhost:5000**
-
----
-
-## 🖥️ Dashboard Features
-
-- **Live Camera Feed** — Streams video from the ESP32-CAM in real-time
-- **GPS Location Map** — Shows the blind user's location on an interactive dark-themed map
-- **Distance Sensor** — Displays obstacle distance in centimeters
-- **Alert Level** — Shows SAFE / WARNING / CRITICAL status
-- **Battery & WiFi Signal** — Monitor device health
-- **Fullscreen Camera** — Click to expand the camera view
-
----
-
-## ⚡ ESP32 Firmware
-
-Flash `firmware/esp32_main.cpp` to your ESP32-CAM using Arduino IDE or PlatformIO.
-
-**Required Hardware:**
-- ESP32-CAM (AI Thinker)
-- HC-SR04 Ultrasonic Sensor
-- GPS Module (NEO-6M) — *todo*
-- Vibration Motor
-- Li-Po 5000mAh Battery
-
----
-
-## 📋 TODO
-
-See [TODO.md](TODO.md) for the full project roadmap.
-
----
-
-## 🔒 Biometric Data & Privacy Policy
-
-VisionX values the user's privacy and takes biometric data security very seriously:
-- **Local Storage Only**: All face photographs and mathematical face encodings (embeddings) are processed and stored strictly on the local backend computer (inside the `config/known_faces` directory and `config/known_faces.json` database).
-- **No Cloud Uploads**: Biometric data is never transmitted to the cloud, external database servers, or third-party service providers.
-- **Caregiver Control**: The caregiver has full control over the enrolled gallery of known faces. People can be added or deleted at any time directly through the local "Known Faces" settings panel.
-
-## 📜 License
-
-MIT License — Open source for accessibility.
+## License
+MIT — Built for accessibility.

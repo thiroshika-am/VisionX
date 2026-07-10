@@ -1,0 +1,37 @@
+# VisionX — Python Dependencies
+# Install all: pip install -r requirements.txt
+
+# ── Core Framework ────────────────────────────────────────────────────────────
+flask>=3.0.0
+flask-cors>=4.0.0
+requests>=2.31.0
+
+# ── Computer Vision ───────────────────────────────────────────────────────────
+ultralytics>=8.3.0          # YOLOv11 (YOLO11n)
+opencv-python>=4.9.0
+opencv-contrib-python>=4.9.0
+numpy>=1.24.0
+Pillow>=10.0.0
+
+# ── AI / ML ───────────────────────────────────────────────────────────────────
+mediapipe>=0.10.14          # Gesture, Pose, Face landmark
+easyocr>=1.7.1              # OCR (multilingual)
+torch>=2.1.0                # PyTorch (depth model, GPU check)
+torchvision>=0.16.0
+
+# ── Face Recognition ─────────────────────────────────────────────────────────
+# YuNet + SFace loaded via OpenCV DNN (no extra dep needed)
+
+# ── Emotion Detection ─────────────────────────────────────────────────────────
+fer>=22.5.1                 # FER (optional — falls back to OpenCV Haar)
+
+# ── Speech / TTS ─────────────────────────────────────────────────────────────
+# Browser Web Speech API is used for frontend TTS/STT (no pip needed)
+# Optional offline TTS on Raspberry Pi:
+# pyttsx3>=2.90
+
+# ── System Monitoring ─────────────────────────────────────────────────────────
+psutil>=5.9.0               # CPU / RAM metrics
+
+# ── GPS / Maps ────────────────────────────────────────────────────────────────
+geopy>=2.4.0                # Optional: geocoding

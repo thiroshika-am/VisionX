@@ -1,0 +1,1 @@
+# SmartCap AI Modules

@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  visionx:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    image: visionx:latest
+    container_name: visionx
+    restart: unless-stopped
+    ports:
+      - "${HOST_PORT:-5000}:${CONTAINER_PORT:-5000}"
+    environment:
+      - PORT=${CONTAINER_PORT:-5000}
+      - FLASK_ENV=production
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - /mnt/tank/docker-data/visionx/logs:/app/logs
+      - /mnt/tank/docker-data/visionx/known_faces:/app/config/known_faces
+      - /mnt/tank/docker-data/visionx/models:/app/config/models
+    networks:
+      - proxy_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${CONTAINER_PORT:-5000}/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+networks:
+  proxy_network:
+    name: proxy_network
+    external: true

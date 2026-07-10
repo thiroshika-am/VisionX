@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="VisionX — AI-Powered Wearable Assistant for the Visually Impaired" />
+  <title>VisionX AI Dashboard</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230A0B0F'/%3E%3Ccircle cx='16' cy='16' r='10' fill='none' stroke='%2300D4FF' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='4' fill='%2300D4FF'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <!-- <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" /> -->
+  <link rel="stylesheet" href="style.css" />
+  <script>
+    (function () {
+      const tok = localStorage.getItem("authToken");
+      if (!tok) window.location.href = "login.html";
+    })();
+  </script>
+</head>
+<body>
+  <!-- ═══════════════════════════════════════════════
+       LOADING SCREEN
+  ═══════════════════════════════════════════════ -->
+  <div id="loading-screen" class="loading-screen">
+    <div class="loading-inner">
+      <div class="loading-logo">
+        <svg class="loading-eye" viewBox="0 0 80 80">
+          <circle cx="40" cy="40" r="35" fill="none" stroke="rgba(0,212,255,0.2)" stroke-width="2"/>
+          <circle cx="40" cy="40" r="25" fill="none" stroke="rgba(0,212,255,0.4)" stroke-width="1.5" stroke-dasharray="4 3"/>
+          <circle class="eye-iris" cx="40" cy="40" r="14" fill="none" stroke="#00D4FF" stroke-width="2"/>
+          <circle cx="40" cy="40" r="6" fill="#00D4FF"/>
+          <circle cx="43" cy="37" r="2" fill="white" opacity="0.8"/>
+        </svg>
+      </div>
+      <h1 class="loading-title">VisionX</h1>
+      <p class="loading-sub">Initializing AI Systems</p>
+      <div class="loading-bar"><div class="loading-fill" id="loading-fill"></div></div>
+      <p class="loading-status" id="loading-status">Loading models...</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       ALERT BANNER
+  ═══════════════════════════════════════════════ -->
+  <div id="alert-banner" class="alert-banner hidden">
+    <div class="alert-icon" id="alert-icon">⚠️</div>
+    <span id="alert-text">Alert message</span>
+    <button class="alert-close" onclick="dismissAlert()">✕</button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       MAIN LAYOUT
+  ═══════════════════════════════════════════════ -->
+  <div class="app-layout">
+
+    <!-- SIDEBAR -->
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <svg class="brand-eye" viewBox="0 0 40 40">
+          <circle cx="20" cy="20" r="17" fill="none" stroke="#00D4FF" stroke-width="1.5"/>
+          <circle cx="20" cy="20" r="8" fill="none" stroke="#00D4FF" stroke-width="1.5"/>
+          <circle cx="20" cy="20" r="3" fill="#00D4FF"/>
+        </svg>
+        <span class="brand-name">VisionX</span>
+      </div>
+
+      <ul class="nav-list">
+        <li class="nav-item active" data-tab="live" onclick="switchTab('live')">
+          <span class="nav-icon">👁</span>
+          <span class="nav-label">Live</span>
+          <div class="nav-badge hidden" id="badge-live"></div>
+        </li>
+        <li class="nav-item" data-tab="detections" onclick="switchTab('detections')">
+          <span class="nav-icon">🎯</span>
+          <span class="nav-label">Detections</span>
+          <div class="nav-badge hidden" id="badge-detections">0</div>
+        </li>
+        <li class="nav-item" data-tab="voice" onclick="switchTab('voice')">
+          <span class="nav-icon">🎤</span>
+          <span class="nav-label">Voice</span>
+        </li>
+        <li class="nav-item" data-tab="map" onclick="switchTab('map')">
+          <span class="nav-icon">🗺</span>
+          <span class="nav-label">Map</span>
+        </li>
+        <li class="nav-item" data-tab="faces" onclick="switchTab('faces')">
+          <span class="nav-icon">👤</span>
+          <span class="nav-label">Faces</span>
+        </li>
+        <li class="nav-item" data-tab="system" onclick="switchTab('system')">
+          <span class="nav-icon">⚡</span>
+          <span class="nav-label">System</span>
+        </li>
+        <li class="nav-item" data-tab="explore" onclick="switchTab('explore')">
+          <span class="nav-icon">🔍</span>
+          <span class="nav-label">Explore</span>
+        </li>
+      </ul>
+
+      <div class="sidebar-footer">
+        <div class="device-pill" id="device-pill">
+          <span class="device-dot offline" id="device-dot"></span>
+          <span id="device-label">Offline</span>
+        </div>
+        <button class="logout-btn" onclick="logout()">⏏ Logout</button>
+      </div>
+    </nav>
+
+    <!-- CONTENT -->
+    <main class="content-area">
+
+      <!-- ───── TAB: LIVE ───── -->
+      <div class="tab-panel active" id="tab-live">
+        <div class="live-layout">
+
+          <!-- Camera Column -->
+          <div class="camera-col">
+            <div class="camera-card">
+              <div class="camera-header">
+                <span class="cam-label">
+                  <span class="rec-dot"></span> LIVE FEED
+                </span>
+                <div class="cam-controls">
+                  <button class="cam-btn" id="btn-snapshot" onclick="takeSnapshot()" title="Snapshot">📷</button>
+                  <button class="cam-btn" id="btn-fullscreen" onclick="toggleFullscreen()" title="Fullscreen">⛶</button>
+                  <button class="cam-btn active" id="btn-detection" onclick="toggleDetection()" title="Toggle AI">🧠</button>
+                </div>
+              </div>
+
+              <div class="camera-viewport" id="camera-viewport">
+                <video id="webcam-video" autoplay playsinline muted></video>
+                <canvas id="detection-canvas"></canvas>
+
+                <!-- Scanline overlay -->
+                <div class="scan-line"></div>
+
+                <!-- Corner brackets -->
+                <div class="corner tl"></div>
+                <div class="corner tr"></div>
+                <div class="corner bl"></div>
+                <div class="corner br"></div>
+
+                <!-- FPS counter -->
+                <div class="fps-overlay" id="fps-display">0 FPS</div>
+
+                <!-- Alert level badge -->
+                <div class="alert-badge SAFE" id="alert-level-badge">SAFE</div>
+              </div>
+
+              <!-- Mode toggles -->
+              <div class="mode-bar">
+                <button class="mode-btn active" id="mode-detect" onclick="setMode('detect')">🎯 Detect</button>
+                <button class="mode-btn" id="mode-ocr"    onclick="setMode('ocr')">📝 OCR</button>
+                <button class="mode-btn" id="mode-depth"  onclick="setMode('depth')">🌊 Depth</button>
+                <button class="mode-btn" id="mode-emotion" onclick="setMode('emotion')">😊 Emotion</button>
+              </div>
+            </div>
+
+            <!-- Depth panel (hidden by default) -->
+            <div class="depth-card hidden" id="depth-card">
+              <div class="depth-header">Depth Map</div>
+              <div class="depth-zones">
+                <div class="depth-zone" id="dz-left">
+                  <span class="zone-label">LEFT</span>
+                  <span class="zone-val" id="dz-left-val">–</span>
+                </div>
+                <div class="depth-zone center" id="dz-center">
+                  <span class="zone-label">CENTER</span>
+                  <span class="zone-val" id="dz-center-val">–</span>
+                </div>
+                <div class="depth-zone" id="dz-right">
+                  <span class="zone-label">RIGHT</span>
+                  <span class="zone-val" id="dz-right-val">–</span>
+                </div>
+              </div>
+              <img id="depth-img" src="" alt="depth" class="depth-img" />
+            </div>
+          </div>
+
+          <!-- Info Column -->
+          <div class="info-col">
+
+            <!-- Quick Stats -->
+            <div class="glass-card stats-card">
+              <div class="card-title">AI Status</div>
+              <div class="stat-grid">
+                <div class="stat-item">
+                  <span class="stat-val" id="stat-fps">0</span>
+                  <span class="stat-key">FPS</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-val" id="stat-objects">0</span>
+                  <span class="stat-key">Objects</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-val" id="stat-cpu">–</span>
+                  <span class="stat-key">CPU</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-val" id="stat-ram">–</span>
+                  <span class="stat-key">RAM</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Active Detections -->
+            <div class="glass-card detections-card">
+              <div class="card-title">Active Detections
+                <span class="count-badge" id="live-det-count">0</span>
+              </div>
+              <div class="det-list" id="live-det-list">
+                <div class="empty-msg">No detections yet</div>
+              </div>
+            </div>
+
+            <!-- Scene Description -->
+            <div class="glass-card scene-card">
+              <div class="card-title">Scene Description</div>
+              <p class="scene-text" id="scene-text">Awaiting analysis…</p>
+              <button class="action-btn" onclick="requestScene()">🔍 Describe Scene</button>
+            </div>
+
+            <!-- Voice Quick Actions -->
+            <div class="glass-card voice-quick-card">
+              <div class="card-title">Voice Commands</div>
+              <div class="quick-cmds">
+                <button class="qcmd" onclick="sendVoiceCmd('what is around me')">👁 Surroundings</button>
+                <button class="qcmd" onclick="sendVoiceCmd('read this')">📝 Read Text</button>
+                <button class="qcmd" onclick="sendVoiceCmd('who is near me')">👤 Who's Near</button>
+                <button class="qcmd" onclick="sendVoiceCmd('where am I')">📍 Location</button>
+                <button class="qcmd danger" onclick="sendVoiceCmd('help')">🆘 SOS</button>
+                <button class="qcmd" onclick="sendVoiceCmd('what bill is this')">💵 Currency</button>
+              </div>
+              <button class="mic-btn" id="mic-btn" onclick="startVoice()">
+                <span id="mic-icon">🎤</span>
+                <span id="mic-label">Hold to Speak</span>
+              </button>
+            </div>
+
+            <!-- Explore Quick Card -->
+            <div class="glass-card explore-quick-card">
+              <div class="card-title">Ask VisionX</div>
+              <div class="explore-input-row">
+                <input type="text" id="explore-input" placeholder="Ask anything..." onkeypress="if(event.key === 'Enter') submitExploreQuery()" />
+                <button onclick="submitExploreQuery()">🔍</button>
+              </div>
+              <div class="place-chips">
+                <button class="place-chip" onclick="quickAssistant('Is there a supermarket nearby')">🛒 Supermarket</button>
+                <button class="place-chip" onclick="quickAssistant('Is there anyone near me')">👤 People</button>
+                <button class="place-chip" onclick="quickAssistant('Where is my water bottle')">🔍 Find Object</button>
+                <button class="place-chip" onclick="quickAssistant('Read this prescription')">💊 Medicine</button>
+                <button class="place-chip" onclick="quickAssistant('Is the path clear')">🛣️ Path Clear?</button>
+                <button class="place-chip" onclick="quickAssistant('Read this sign')">📝 Read Text</button>
+              </div>
+              <div class="explore-response" id="explore-response"></div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ───── TAB: DETECTIONS ───── -->
+      <div class="tab-panel" id="tab-detections">
+        <div class="page-header">
+          <h2>Detection History</h2>
+          <div class="page-controls">
+            <select id="det-filter" onchange="filterDetections(this.value)" class="filter-select">
+              <option value="all">All Objects</option>
+              <option value="CRITICAL">Critical Only</option>
+              <option value="WARNING">Warning+</option>
+              <option value="person">People</option>
+            </select>
+            <button class="icon-btn" onclick="clearDetectionHistory()">🗑 Clear</button>
+          </div>
+        </div>
+
+        <div class="det-stats-row">
+          <div class="det-stat-card">
+            <span class="dsc-val" id="total-detections">0</span>
+            <span class="dsc-key">Total Detections</span>
+          </div>
+          <div class="det-stat-card critical">
+            <span class="dsc-val" id="critical-count">0</span>
+            <span class="dsc-key">Critical</span>
+          </div>
+          <div class="det-stat-card warning">
+            <span class="dsc-val" id="warning-count">0</span>
+            <span class="dsc-key">Warning</span>
+          </div>
+          <div class="det-stat-card">
+            <span class="dsc-val" id="unique-classes">0</span>
+            <span class="dsc-key">Unique Classes</span>
+          </div>
+        </div>
+
+        <div class="detection-grid" id="detection-grid">
+          <div class="empty-state">No detections yet. Start the live feed to begin.</div>
+        </div>
+
+        <!-- Gesture & Emotion strip -->
+        <div class="modality-row">
+          <div class="glass-card modality-card">
+            <div class="card-title">Last Gesture</div>
+            <div class="modality-val" id="gesture-display">No gesture</div>
+          </div>
+          <div class="glass-card modality-card">
+            <div class="card-title">Emotion Detected</div>
+            <div class="modality-val" id="emotion-display">No emotion</div>
+          </div>
+          <div class="glass-card modality-card">
+            <div class="card-title">Body Posture</div>
+            <div class="modality-val" id="pose-display">No pose</div>
+          </div>
+          <div class="glass-card modality-card">
+            <div class="card-title">Fall Status</div>
+            <div class="modality-val safe" id="fall-display">✅ Normal</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ───── TAB: VOICE ───── -->
+      <div class="tab-panel" id="tab-voice">
+        <div class="voice-layout">
+          <div class="voice-main">
+            <div class="glass-card voice-card">
+              <div class="voice-visual">
+                <div class="wave-ring r1"></div>
+                <div class="wave-ring r2"></div>
+                <div class="wave-ring r3"></div>
+                <button class="mic-big" id="mic-big" onclick="toggleVoice()">
+                  <span id="mic-big-icon">🎤</span>
+                </button>
+              </div>
+              <p class="voice-status" id="voice-status">Tap microphone to speak</p>
+              <div class="transcript-box" id="transcript-box"></div>
+              <div class="response-box" id="response-box"></div>
+            </div>
+
+            <div class="glass-card">
+              <div class="card-title">Quick Commands</div>
+              <div class="cmd-grid">
+                <button class="cmd-chip" onclick="sendVoiceCmd('what is around me')">What's around me?</button>
+                <button class="cmd-chip" onclick="sendVoiceCmd('read this')">Read this</button>
+                <button class="cmd-chip" onclick="sendVoiceCmd('where am I')">Where am I?</button>
+                <button class="cmd-chip" onclick="sendVoiceCmd('who is near me')">Who is near me?</button>
+                <button class="cmd-chip" onclick="sendVoiceCmd('what bill is this')">Identify currency</button>
+                <button class="cmd-chip" onclick="sendVoiceCmd('what am I holding')">What am I holding?</button>
+                <button class="cmd-chip danger" onclick="sendVoiceCmd('help')">🆘 Emergency Help</button>
+                <button class="cmd-chip" onclick="sendVoiceCmd('stop navigation')">Stop Navigation</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="voice-sidebar">
+            <div class="glass-card">
+              <div class="card-title">Command History</div>
+              <div class="cmd-history" id="cmd-history">
+                <div class="empty-msg">No commands yet</div>
+              </div>
+            </div>
+
+            <div class="glass-card">
+              <div class="card-title">TTS Settings</div>
+              <div class="tts-controls">
+                <label>Speed
+                  <input type="range" min="0.5" max="2" step="0.1" value="1" id="tts-rate" oninput="updateTTS()"/>
+                </label>
+                <label>Volume
+                  <input type="range" min="0" max="1" step="0.1" value="1" id="tts-vol" oninput="updateTTS()"/>
+                </label>
+                <label>Pitch
+                  <input type="range" min="0.5" max="2" step="0.1" value="1" id="tts-pitch" oninput="updateTTS()"/>
+                </label>
+                <button class="action-btn" onclick="stopSpeaking()">⏹ Stop Speaking</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ───── TAB: MAP ───── -->
+      <div class="tab-panel" id="tab-map">
+        <div class="map-layout">
+          <div id="gps-map" class="gps-map"></div>
+          <div class="map-info-panel">
+            <div class="glass-card">
+              <div class="card-title">Navigation</div>
+              <div class="nav-controls">
+                <input type="text" id="destination-input" class="nav-input" placeholder="Enter destination...">
+                <div class="nav-buttons">
+                  <button class="action-btn" onclick="startNavigation()">Navigate</button>
+                  <button class="action-btn danger hidden" id="stop-nav-btn" onclick="stopNavigation()">Stop</button>
+                </div>
+                <div id="nav-instruction" class="nav-instruction hidden">
+                  Waiting for route...
+                </div>
+              </div>
+            </div>
+            <div class="glass-card">
+              <div class="card-title">GPS Location</div>
+              <div class="gps-data">
+                <div class="gps-row"><span>Latitude</span><span id="gps-lat">–</span></div>
+                <div class="gps-row"><span>Longitude</span><span id="gps-lng">–</span></div>
+                <div class="gps-row"><span>Accuracy</span><span id="gps-acc">–</span></div>
+                <div class="gps-row"><span>Speed</span><span id="gps-spd">–</span></div>
+                <div class="gps-row"><span>Source</span><span id="gps-src">–</span></div>
+              </div>
+              <button class="action-btn" onclick="centerMap()">🎯 Center Map</button>
+            </div>
+            <div class="glass-card">
+              <div class="card-title">Device Status</div>
+              <div class="gps-data">
+                <div class="gps-row"><span>Battery</span><span id="dev-battery">–</span></div>
+                <div class="gps-row"><span>WiFi RSSI</span><span id="dev-rssi">–</span></div>
+                <div class="gps-row"><span>Distance</span><span id="dev-dist">–</span></div>
+                <div class="gps-row"><span>Alert</span><span id="dev-alert">SAFE</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ───── TAB: FACES ───── -->
+      <div class="tab-panel" id="tab-faces">
+        <div class="page-header">
+          <h2>Known Faces</h2>
+          <button class="action-btn" onclick="openEnrollModal()">➕ Add Person</button>
+        </div>
+        <div class="faces-grid" id="faces-grid">
+          <div class="empty-state">No known faces enrolled yet.</div>
+        </div>
+
+        <!-- Recent sightings -->
+        <div class="glass-card" style="margin-top:1.5rem">
+          <div class="card-title">Recent Sightings</div>
+          <div class="sightings-list" id="sightings-list">
+            <div class="empty-msg">No sightings logged</div>
+          </div>
+        </div>
+
+        <!-- Enroll modal -->
+        <div class="modal-overlay hidden" id="enroll-modal">
+          <div class="modal-card">
+            <h3>Enroll New Person</h3>
+            <input class="modal-input" type="text" id="enroll-name" placeholder="Full name" />
+            <div class="enroll-preview-area" id="enroll-preview">
+              <span>Click Capture to take photo</span>
+            </div>
+            <div class="modal-actions">
+              <button class="action-btn" onclick="captureEnrollPhoto()">📷 Capture</button>
+              <button class="action-btn primary" onclick="submitEnroll()">✅ Enroll</button>
+              <button class="action-btn" onclick="closeEnrollModal()">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ───── TAB: EXPLORE ───── -->
+      <div class="tab-panel" id="tab-explore">
+        <div class="page-header">
+          <h2>Explore & Ask</h2>
+          <div class="page-controls">
+            <button class="icon-btn" onclick="clearExploreHistory()">🗑 Clear History</button>
+          </div>
+        </div>
+
+        <div class="explore-layout">
+          <!-- Left Col: Input & Results -->
+          <div class="explore-main">
+            <!-- Search Bar -->
+            <div class="glass-card explore-search-card">
+              <div class="explore-input-lg">
+                <button class="mic-btn-sm" onclick="startVoice()"><span id="explore-mic-icon">🎤</span></button>
+                <input type="text" id="explore-input-lg" placeholder="Ask VisionX about places, objects, or text..." onkeypress="if(event.key === 'Enter') submitExploreQueryLg()" />
+                <button class="action-btn" onclick="submitExploreQueryLg()">Ask</button>
+              </div>
+            </div>
+
+            <!-- Quick Categories -->
+            <div class="glass-card">
+              <div class="card-title">Quick Search</div>
+              <div class="explore-grid-lg">
+                <button class="explore-tile" onclick="quickAssistant('Find a supermarket')"><span class="t-icon">🛒</span><span class="t-lbl">Supermarket</span></button>
+                <button class="explore-tile" onclick="quickAssistant('Find a pharmacy')"><span class="t-icon">🏥</span><span class="t-lbl">Pharmacy</span></button>
+                <button class="explore-tile" onclick="quickAssistant('Find a restaurant')"><span class="t-icon">🍕</span><span class="t-lbl">Restaurant</span></button>
+                <button class="explore-tile" onclick="quickAssistant('Find an ATM')"><span class="t-icon">🏧</span><span class="t-lbl">ATM</span></button>
+                <button class="explore-tile" onclick="quickAssistant('Find a bus stop')"><span class="t-icon">🚌</span><span class="t-lbl">Bus Stop</span></button>
+                <button class="explore-tile" onclick="quickAssistant('Anyone near me?')"><span class="t-icon">👤</span><span class="t-lbl">People Nearby</span></button>
+                <button class="explore-tile" onclick="quickAssistant('Where is my water bottle?')"><span class="t-icon">🔍</span><span class="t-lbl">Find Object</span></button>
+                <button class="explore-tile" onclick="quickAssistant('Read this prescription')"><span class="t-icon">💊</span><span class="t-lbl">Read Medicine</span></button>
+                <button class="explore-tile" onclick="quickAssistant('Is the path clear?')"><span class="t-icon">🛣️</span><span class="t-lbl">Check Path</span></button>
+                <button class="explore-tile" onclick="quickAssistant('What is this object?')"><span class="t-icon">🧳</span><span class="t-lbl">Identify Object</span></button>
+              </div>
+            </div>
+
+            <!-- Current Result -->
+            <div class="glass-card explore-result-card hidden" id="explore-main-result">
+              <div class="card-title">Answer</div>
+              <div class="explore-answer" id="explore-main-answer"></div>
+              <div class="explore-places-list" id="explore-places-list"></div>
+            </div>
+          </div>
+
+          <!-- Right Col: History & Context -->
+          <div class="explore-side">
+            <div class="glass-card">
+              <div class="card-title">Camera Context</div>
+              <div class="camera-preview-small" id="explore-camera-preview">
+                <video id="explore-video-clone" autoplay playsinline muted></video>
+              </div>
+              <p class="explore-context-note">VisionX uses this live view to answer your questions.</p>
+            </div>
+
+            <div class="glass-card explore-history-card">
+              <div class="card-title">History</div>
+              <div class="assistant-history" id="assistant-history">
+                <div class="empty-msg">Ask a question to see history</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ───── TAB: SYSTEM ───── -->
+      <div class="tab-panel" id="tab-system">
+        <div class="page-header">
+          <h2>System Monitor</h2>
+          <span class="uptime-badge" id="uptime-badge">Uptime: –</span>
+        </div>
+
+        <div class="system-gauges">
+          <div class="gauge-card">
+            <svg class="gauge-svg" viewBox="0 0 120 70">
+              <path class="gauge-track" d="M10 60 A50 50 0 0 1 110 60"/>
+              <path class="gauge-fill cpu-fill" id="gauge-cpu-path" d="M10 60 A50 50 0 0 1 110 60" stroke-dasharray="0 157"/>
+            </svg>
+            <div class="gauge-val" id="gauge-cpu-val">0%</div>
+            <div class="gauge-lbl">CPU</div>
+          </div>
+          <div class="gauge-card">
+            <svg class="gauge-svg" viewBox="0 0 120 70">
+              <path class="gauge-track" d="M10 60 A50 50 0 0 1 110 60"/>
+              <path class="gauge-fill ram-fill" id="gauge-ram-path" d="M10 60 A50 50 0 0 1 110 60" stroke-dasharray="0 157"/>
+            </svg>
+            <div class="gauge-val" id="gauge-ram-val">0%</div>
+            <div class="gauge-lbl">RAM</div>
+          </div>
+          <div class="gauge-card">
+            <svg class="gauge-svg" viewBox="0 0 120 70">
+              <path class="gauge-track" d="M10 60 A50 50 0 0 1 110 60"/>
+              <path class="gauge-fill gpu-fill" id="gauge-gpu-path" d="M10 60 A50 50 0 0 1 110 60" stroke-dasharray="0 157"/>
+            </svg>
+            <div class="gauge-val" id="gauge-gpu-val">N/A</div>
+            <div class="gauge-lbl">GPU</div>
+          </div>
+          <div class="gauge-card fps-gauge">
+            <div class="fps-big" id="fps-big">0</div>
+            <div class="gauge-lbl">FPS</div>
+            <div class="fps-sub" id="fps-sub">Frames per second</div>
+          </div>
+        </div>
+
+        <div class="system-bottom">
+          <div class="glass-card model-status-card">
+            <div class="card-title">AI Module Status</div>
+            <div class="module-list" id="module-list">Loading...</div>
+          </div>
+
+          <div class="glass-card log-viewer-card">
+            <div class="card-title">Event Log
+              <select id="log-kind" onchange="loadLogs()" class="filter-select sm">
+                <option value="events">Events</option>
+                <option value="detections">Detections</option>
+                <option value="performance">Performance</option>
+              </select>
+              <button class="icon-btn sm" onclick="clearLogs()">🗑</button>
+            </div>
+            <div class="log-entries" id="log-entries">
+              <div class="empty-msg">No logs yet</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- ═══════════════════════════════════════════════
+       SCRIPTS
+  ═══════════════════════════════════════════════ -->
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Detection Test</title>
+</head>
+<body>
+    <h1>Detection System Test</h1>
+    <video id="video" width="640" height="480" autoplay></video>
+    <canvas id="canvas" width="640" height="480"></canvas>
+    <div id="status">Initializing...</div>
+    <div id="result"></div>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const status = document.getElementById('status');
+        const result = document.getElementById('result');
+
+        // Start camera
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+                status.textContent = 'Camera active. Testing detection...';
+                
+                // Test detection after 2 seconds
+                setTimeout(testDetection, 2000);
+            })
+            .catch(err => {
+                status.textContent = 'Camera error: ' + err.message;
+            });
+
+        async function testDetection() {
+            try {
+                // Capture frame
+                ctx.drawImage(video, 0, 0, 640, 480);
+                const imageData = canvas.toDataURL('image/jpeg', 0.8);
+                
+                status.textContent = 'Sending to backend...';
+                
+                // Send to backend
+                const response = await fetch('http://localhost:5000/api/detect', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image: imageData })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Backend returned: ' + response.status);
+                }
+                
+                const data = await response.json();
+                
+                status.textContent = '✅ Detection working!';
+                result.innerHTML = '<strong>Results:</strong><br>' +
+                    'Detections: ' + data.count + '<br>' +
+                    'Alert Level: ' + data.alert_level + '<br>' +
+                    JSON.stringify(data.detections, null, 2);
+                    
+            } catch (err) {
+                status.textContent = '❌ Error: ' + err.message;
+                result.textContent = 'Full error: ' + err.stack;
+            }
+        }
+    </script>
+</body>
+</html>

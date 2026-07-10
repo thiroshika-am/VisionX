@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VisionX - Blind Obstacle Detection</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%2300D4FF'/%3E%3Cstop offset='100%25' stop-color='%237C3AED'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='6' fill='%230F172A'/%3E%3Cpath d='M18 3L6 18h7l-2 11 12-15h-7l2-11z' fill='url(%23g)'/%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Colors */
+            --primary: #00D4FF;
+            --secondary: #7C3AED;
+            --accent: #8B5CF6;
+            --dark-bg: #0F172A;
+            --card-bg: rgba(15, 23, 42, 0.8);
+            --glass-border: rgba(0, 212, 255, 0.15);
+            --success: #10B981;
+            --danger: #EF4444;
+            --text-primary: #F1F5F9;
+            --text-secondary: #CBD5E1;
+            --font-base: 'Orbitron', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            font-family: var(--font-base);
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Animated Background */
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(ellipse at 20% 50%, rgba(124, 58, 237, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 40% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 50%);
+            animation: backgroundShift 15s ease-in-out infinite;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        @keyframes backgroundShift {
+            0%, 100% {
+                filter: hue-rotate(0deg);
+            }
+            50% {
+                filter: hue-rotate(10deg) brightness(1.1);
+            }
+        }
+
+        /* Grid Background */
+        .grid-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(0deg, transparent 24%, rgba(0, 212, 255, 0.05) 25%, rgba(0, 212, 255, 0.05) 26%, transparent 27%, transparent 74%, rgba(0, 212, 255, 0.05) 75%, rgba(0, 212, 255, 0.05) 76%, transparent 77%, transparent),
+                linear-gradient(90deg, transparent 24%, rgba(0, 212, 255, 0.05) 25%, rgba(0, 212, 255, 0.05) 26%, transparent 27%, transparent 74%, rgba(0, 212, 255, 0.05) 75%, rgba(0, 212, 255, 0.05) 76%, transparent 77%, transparent);
+            background-size: 50px 50px;
+            z-index: -1;
+            pointer-events: none;
+            animation: gridScroll 8s linear infinite;
+        }
+
+        @keyframes gridScroll {
+            0% {
+                background-position: 0 0;
+            }
+            100% {
+                background-position: 50px 50px;
+            }
+        }
+
+        /* Main Container */
+        .login-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 1;
+        }
+
+        .login-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            max-width: 1200px;
+            width: 100%;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 30px;
+        }
+
+        .logo-display {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            animation: slideInLeft 0.8s ease-out;
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .logo-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.2) 0%, rgba(124, 58, 237, 0.2) 100%);
+            border: 2px solid var(--primary);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.3),
+                        inset 0 0 20px rgba(0, 212, 255, 0.1);
+            animation: logoGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes logoGlow {
+            0%, 100% {
+                box-shadow: 0 0 30px rgba(0, 212, 255, 0.3),
+                           inset 0 0 20px rgba(0, 212, 255, 0.1);
+            }
+            50% {
+                box-shadow: 0 0 50px rgba(0, 212, 255, 0.5),
+                           inset 0 0 30px rgba(0, 212, 255, 0.2);
+            }
+        }
+
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo-main {
+            font-size: 48px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .logo-sub {
+            font-size: 14px;
+            color: var(--text-secondary);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        .feature-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            animation: slideInLeft 0.8s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .feature-item:nth-child(1) { animation-delay: 0.1s; }
+        .feature-item:nth-child(2) { animation-delay: 0.2s; }
+        .feature-item:nth-child(3) { animation-delay: 0.3s; }
+        .feature-item:nth-child(4) { animation-delay: 0.4s; }
+
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, rgba(124, 58, 237, 0.1) 100%);
+            border: 1px solid var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .feature-text {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .feature-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .feature-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* Form Container */
+        .login-container {
+            background: linear-gradient(135deg, var(--card-bg) 0%, rgba(15, 23, 42, 0.6) 100%);
+            backdrop-filter: blur(40px) saturate(200%);
+            border: 2px solid var(--glass-border);
+            border-radius: 25px;
+            padding: 50px 40px;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                0 0 60px rgba(0, 212, 255, 0.1),
+                inset 0 1px 1px rgba(255, 255, 255, 0.1);
+            animation: slideInRight 0.8s ease-out;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .form-header {
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .form-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .form-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 30px;
+            border-bottom: 2px solid rgba(0, 212, 255, 0.1);
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 15px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .tab-button.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .tab-button:hover:not(.active) {
+            color: var(--primary);
+            opacity: 0.7;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid rgba(0, 212, 255, 0.2);
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.05) 0%, rgba(124, 58, 237, 0.05) 100%);
+            font-size: 14px;
+            font-family: var(--font-base);
+            color: var(--text-primary);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, rgba(124, 58, 237, 0.1) 100%);
+            box-shadow: 
+                inset 0 2px 8px rgba(0, 0, 0, 0.2),
+                0 0 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .form-group input::placeholder {
+            color: rgba(203, 213, 225, 0.4);
+        }
+
+        .submit-button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            color: var(--dark-bg);
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 
+                0 4px 15px rgba(0, 212, 255, 0.3),
+                inset 0 1px 2px rgba(255, 255, 255, 0.2);
+            margin-top: 10px;
+            font-family: var(--font-base);
+        }
+
+        .submit-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 
+                0 8px 25px rgba(0, 212, 255, 0.5),
+                inset 0 1px 2px rgba(255, 255, 255, 0.2);
+        }
+
+        .submit-button:active {
+            transform: translateY(0);
+        }
+
+        .message {
+            margin-top: 15px;
+            padding: 14px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            display: none;
+            border: 2px solid;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #FCA5A5;
+            border-color: rgba(239, 68, 68, 0.3);
+            display: block;
+        }
+
+        .message.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #86EFAC;
+            border-color: rgba(16, 185, 129, 0.3);
+            display: block;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0, 212, 255, 0.2);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .spinner-text {
+            display: inline-block;
+            margin-left: 12px;
+            color: var(--primary);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .info-text {
+            color: var(--text-secondary);
+            font-size: 12px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .requirements {
+            background: rgba(0, 212, 255, 0.05);
+            padding: 16px;
+            border-radius: 10px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 12px;
+            border: 1px solid rgba(0, 212, 255, 0.1);
+        }
+
+        .requirements strong {
+            color: var(--primary);
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .requirements ul {
+            margin-left: 20px;
+            margin-top: 6px;
+        }
+
+        .requirements li {
+            margin: 4px 0;
+            color: var(--text-secondary);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .login-content {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .logo-section {
+                text-align: center;
+            }
+
+            .logo-display {
+                justify-content: center;
+            }
+
+            .feature-list {
+                max-width: 400px;
+                margin: 0 auto;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .login-wrapper {
+                padding: 15px;
+            }
+
+            .login-container {
+                padding: 35px 25px;
+            }
+
+            .logo-main {
+                font-size: 36px;
+            }
+
+            .logo-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 36px;
+            }
+
+            .form-title {
+                font-size: 24px;
+            }
+
+            .tab-button {
+                font-size: 12px;
+                padding: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-content {
+                gap: 30px;
+            }
+
+            .logo-main {
+                font-size: 28px;
+            }
+
+            .logo-section {
+                gap: 20px;
+            }
+
+            .feature-list {
+                max-width: 100%;
+            }
+
+            .login-container {
+                padding: 25px 20px;
+            }
+
+            .form-group {
+                margin-bottom: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="animated-bg"></div>
+    <div class="grid-bg"></div>
+
+    <div class="login-wrapper">
+        <div class="login-content">
+            <!-- Logo Section -->
+            <div class="logo-section">
+                <div class="logo-display">
+                    <div class="logo-icon">
+                        <svg viewBox="0 0 100 100" width="100%" height="100%">
+                            <!-- 3D Eye Icon -->
+                            <defs>
+                                <radialGradient id="eyeGlow" cx="40%" cy="40%">
+                                    <stop offset="0%" style="stop-color:#00D4FF;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#0066CC;stop-opacity:1" />
+                                </radialGradient>
+                            </defs>
+                            <!-- Outer eye white -->
+                            <ellipse cx="50" cy="50" rx="35" ry="28" fill="url(#eyeGlow)" opacity="0.3"/>
+                            <!-- Eye outline -->
+                            <ellipse cx="50" cy="50" rx="35" ry="28" fill="none" stroke="#00D4FF" stroke-width="2"/>
+                            <!-- Iris -->
+                            <circle cx="50" cy="50" r="18" fill="url(#eyeGlow)"/>
+                            <!-- Pupil with glow -->
+                            <circle cx="50" cy="50" r="12" fill="#001a4d"/>
+                            <!-- Highlight for 3D effect -->
+                            <circle cx="45" cy="45" r="5" fill="#00D4FF" opacity="0.8"/>
+                            <circle cx="47" cy="47" r="2" fill="#FFFFFF"/>
+                        </svg>
+                    </div>
+                    <div class="logo-text">
+                        <div class="logo-main">VisionX</div>
+                        <div class="logo-sub">Pro Edition</div>
+                    </div>
+                </div>
+
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <svg viewBox="0 0 100 100" width="100%" height="100%">
+                                <!-- 3D Brain/AI Icon -->
+                                <defs>
+                                    <linearGradient id="brainGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#00D4FF;stop-opacity:1" />
+                                        <stop offset="100%" style="stop-color:#7C3AED;stop-opacity:1" />
+                                    </linearGradient>
+                                </defs>
+                                <!-- Main brain lobes -->
+                                <circle cx="35" cy="35" r="18" fill="url(#brainGrad)"/>
+                                <circle cx="65" cy="35" r="18" fill="url(#brainGrad)"/>
+                                <circle cx="50" cy="65" r="16" fill="url(#brainGrad)"/>
+                                <!-- Connecting nodes -->
+                                <circle cx="50" cy="50" r="8" fill="#00D4FF"/>
+                                <!-- Circuit lines -->
+                                <line x1="35" y1="35" x2="50" y2="50" stroke="#00D4FF" stroke-width="2" opacity="0.5"/>
+                                <line x1="65" y1="35" x2="50" y2="50" stroke="#00D4FF" stroke-width="2" opacity="0.5"/>
+                                <line x1="50" y1="50" x2="50" y2="65" stroke="#00D4FF" stroke-width="2" opacity="0.5"/>
+                            </svg>
+                        </div>
+                        <div class="feature-text">
+                            <div class="feature-title">AI Detection</div>
+                            <div class="feature-desc">Real-time obstacle detection</div>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <svg viewBox="0 0 100 100" width="100%" height="100%">
+                                <!-- 3D Target Icon -->
+                                <defs>
+                                    <radialGradient id="targetGrad" cx="50%" cy="50%">
+                                        <stop offset="0%" style="stop-color:#00D4FF;stop-opacity:1" />
+                                        <stop offset="100%" style="stop-color:#0066CC;stop-opacity:0.3" />
+                                    </radialGradient>
+                                </defs>
+                                <!-- Outer rings -->
+                                <circle cx="50" cy="50" r="40" fill="none" stroke="#00D4FF" stroke-width="3" opacity="0.6"/>
+                                <circle cx="50" cy="50" r="28" fill="none" stroke="#00D4FF" stroke-width="2" opacity="0.8"/>
+                                <!-- Center dot -->
+                                <circle cx="50" cy="50" r="8" fill="url(#targetGrad)"/>
+                                <!-- Cross lines -->
+                                <line x1="50" y1="20" x2="50" y2="80" stroke="#00D4FF" stroke-width="1.5" opacity="0.4"/>
+                                <line x1="20" y1="50" x2="80" y2="50" stroke="#00D4FF" stroke-width="1.5" opacity="0.4"/>
+                            </svg>
+                        </div>
+                        <div class="feature-text">
+                            <div class="feature-title">Precise Navigation</div>
+                            <div class="feature-desc">Advanced tracking system</div>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <svg viewBox="0 0 100 100" width="100%" height="100%">
+                                <!-- 3D Speaker Icon -->
+                                <defs>
+                                    <linearGradient id="speakerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#00D4FF;stop-opacity:1" />
+                                        <stop offset="100%" style="stop-color:#8B5CF6;stop-opacity:1" />
+                                    </linearGradient>
+                                </defs>
+                                <!-- Speaker cone -->
+                                <path d="M 30 35 L 45 25 L 45 75 L 30 65 Z" fill="url(#speakerGrad)"/>
+                                <!-- Sound waves -->
+                                <path d="M 55 45 Q 65 40 70 50 Q 65 60 55 55" fill="none" stroke="#00D4FF" stroke-width="2" opacity="0.7"/>
+                                <path d="M 65 35 Q 78 25 85 50 Q 78 75 65 65" fill="none" stroke="#00D4FF" stroke-width="2" opacity="0.5"/>
+                            </svg>
+                        </div>
+                        <div class="feature-text">
+                            <div class="feature-title">Voice Guidance</div>
+                            <div class="feature-desc">Natural text-to-speech alerts</div>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <svg viewBox="0 0 100 100" width="100%" height="100%">
+                                <!-- 3D Shield Icon -->
+                                <defs>
+                                    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#00D4FF;stop-opacity:1" />
+                                        <stop offset="100%" style="stop-color:#10B981;stop-opacity:1" />
+                                    </linearGradient>
+                                </defs>
+                                <!-- Shield shape -->
+                                <path d="M 50 15 L 70 28 L 70 55 Q 70 75 50 85 Q 30 75 30 55 L 30 28 Z" fill="url(#shieldGrad)" opacity="0.8"/>
+                                <!-- Shield border -->
+                                <path d="M 50 15 L 70 28 L 70 55 Q 70 75 50 85 Q 30 75 30 55 L 30 28 Z" fill="none" stroke="#00D4FF" stroke-width="2"/>
+                                <!-- Checkmark inside -->
+                                <path d="M 42 55 L 48 62 L 60 45" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <div class="feature-text">
+                            <div class="feature-title">Secure Data</div>
+                            <div class="feature-desc">Encrypted authentication</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Login Form -->
+            <div class="login-container">
+                <div class="form-header">
+                    <div class="form-title">Access Portal</div>
+                    <div class="form-subtitle">Sign in to your VisionX account</div>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab-button active" onclick="switchTab('login', this)">Login</button>
+                    <button class="tab-button" onclick="switchTab('register', this)">Register</button>
+                </div>
+
+                <!-- LOGIN TAB -->
+                <div id="login" class="tab-content active">
+                    <form id="loginForm" onsubmit="handleLogin(event)">
+                        <div class="form-group">
+                            <label for="loginUsername">Username</label>
+                            <input type="text" id="loginUsername" placeholder="Enter your username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="loginPassword">Password</label>
+                            <input type="password" id="loginPassword" placeholder="Enter your password" required>
+                        </div>
+                        <button type="submit" class="submit-button">Login</button>
+                        <div class="loading" id="loginLoading">
+                            <div class="spinner"></div>
+                            <span class="spinner-text">Authenticating...</span>
+                        </div>
+                        <div class="message" id="loginMessage"></div>
+                    </form>
+                    <p class="info-text">New to VisionX? Create an account above</p>
+                </div>
+
+                <!-- REGISTER TAB -->
+                <div id="register" class="tab-content">
+                    <form id="registerForm" onsubmit="handleRegister(event)">
+                        <div class="form-group">
+                            <label for="registerUsername">Username</label>
+                            <input type="text" id="registerUsername" placeholder="Choose a username (3+ chars)" required minlength="3">
+                        </div>
+                        <div class="form-group">
+                            <label for="registerEmail">Email (Optional)</label>
+                            <input type="email" id="registerEmail" placeholder="your@email.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="registerPassword">Password</label>
+                            <input type="password" id="registerPassword" placeholder="Create a strong password (6+ chars)" required minlength="6">
+                        </div>
+                        <div class="form-group">
+                            <label for="registerPasswordConfirm">Confirm Password</label>
+                            <input type="password" id="registerPasswordConfirm" placeholder="Confirm your password" required>
+                        </div>
+                        <div class="requirements">
+                            <strong>Requirements:</strong>
+                            <ul>
+                                <li>✓ Minimum 3 characters for username</li>
+                                <li>✓ Minimum 6 characters for password</li>
+                                <li>✓ Mix of letters and numbers recommended</li>
+                            </ul>
+                        </div>
+                        <button type="submit" class="submit-button">Create Account</button>
+                        <div class="loading" id="registerLoading">
+                            <div class="spinner"></div>
+                            <span class="spinner-text">Creating account...</span>
+                        </div>
+                        <div class="message" id="registerMessage"></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const CONFIG = {
+            API_BASE: window.location.origin
+        };
+
+        function switchTab(tabName, btn) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(b => {
+                b.classList.remove('active');
+            });
+
+            document.getElementById(tabName).classList.add('active');
+            if (btn) btn.classList.add('active');
+
+            document.getElementById('loginMessage').className = 'message';
+            document.getElementById('registerMessage').className = 'message';
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const messageEl = document.getElementById('loginMessage');
+            const loadingEl = document.getElementById('loginLoading');
+
+            if (!username || !password) {
+                showMessage(messageEl, 'Please enter username and password', 'error');
+                return;
+            }
+
+            loadingEl.style.display = 'flex';
+            messageEl.innerHTML = '';
+
+            try {
+                const response = await fetch(`${CONFIG.API_BASE}/api/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    showMessage(messageEl, 'Login successful! Redirecting...', 'success');
+                    localStorage.setItem('authToken', data.token);
+                    localStorage.setItem('username', username);
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 500);
+                } else {
+                    showMessage(messageEl, data.message || 'Login failed', 'error');
+                }
+            } catch (err) {
+                showMessage(messageEl, 'Connection error: ' + err.message, 'error');
+            } finally {
+                loadingEl.style.display = 'none';
+            }
+        }
+
+        async function handleRegister(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('registerUsername').value.trim();
+            const email = document.getElementById('registerEmail').value.trim();
+            const password = document.getElementById('registerPassword').value;
+            const passwordConfirm = document.getElementById('registerPasswordConfirm').value;
+            const messageEl = document.getElementById('registerMessage');
+            const loadingEl = document.getElementById('registerLoading');
+
+            if (username.length < 3) {
+                showMessage(messageEl, 'Username must be at least 3 characters', 'error');
+                return;
+            }
+
+            if (password.length < 6) {
+                showMessage(messageEl, 'Password must be at least 6 characters', 'error');
+                return;
+            }
+
+            if (password !== passwordConfirm) {
+                showMessage(messageEl, 'Passwords do not match', 'error');
+                return;
+            }
+
+            loadingEl.style.display = 'flex';
+            messageEl.innerHTML = '';
+
+            try {
+                const response = await fetch(`${CONFIG.API_BASE}/api/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, email: email || null, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    showMessage(messageEl, 'Account created! Redirecting...', 'success');
+                    document.getElementById('registerForm').reset();
+                    localStorage.setItem('authToken', data.token);
+                    localStorage.setItem('username', username);
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 500);
+                } else {
+                    showMessage(messageEl, data.message || 'Registration failed', 'error');
+                }
+            } catch (err) {
+                showMessage(messageEl, 'Connection error: ' + err.message, 'error');
+            } finally {
+                loadingEl.style.display = 'none';
+            }
+        }
+
+        function showMessage(element, message, type) {
+            element.textContent = message;
+            element.className = `message ${type}`;
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('authToken');
+            if (token) {
+                fetch(`${CONFIG.API_BASE}/api/verify-token`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token: token })
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.valid) window.location.href = 'index.html';
+                    else localStorage.removeItem('authToken');
+                })
+                .catch(() => localStorage.removeItem('authToken'));
+            }
+        });
+    </script>
+</body>
+</html>

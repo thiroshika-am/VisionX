@@ -231,6 +231,11 @@ def build_ai_bp(config):
             image_b64 = data.get("image")
             if not image_b64:
                 return jsonify({"error": "No image", "emotions": []}), 400
+            
+            with state.frame_lock:
+                state.latest_frame_data = image_b64
+                state.latest_frame_time = time.time()
+                
             from ai_modules.emotion_engine import get_emotion_engine
             result = get_emotion_engine().detect_from_base64(image_b64)
             return jsonify(result)
@@ -246,6 +251,11 @@ def build_ai_bp(config):
             image_b64 = data.get("image")
             if not image_b64:
                 return jsonify({"error": "No image", "poses": []}), 400
+            
+            with state.frame_lock:
+                state.latest_frame_data = image_b64
+                state.latest_frame_time = time.time()
+                
             from ai_modules.pose_engine import get_pose_engine
             result = get_pose_engine().detect_from_base64(image_b64)
             return jsonify(result)
@@ -261,6 +271,11 @@ def build_ai_bp(config):
             image_b64 = data.get("image")
             if not image_b64:
                 return jsonify({"error": "No image"}), 400
+            
+            with state.frame_lock:
+                state.latest_frame_data = image_b64
+                state.latest_frame_time = time.time()
+                
             src_path = os.path.join(os.path.dirname(__file__), "..", "..", "src")
             sys.path.insert(0, src_path)
             from ai.depth_estimator import get_depth_estimator
@@ -279,6 +294,11 @@ def build_ai_bp(config):
             image_b64 = data.get("image")
             if not image_b64:
                 return jsonify({"error": "No image"}), 400
+            
+            with state.frame_lock:
+                state.latest_frame_data = image_b64
+                state.latest_frame_time = time.time()
+                
             src_path = os.path.join(os.path.dirname(__file__), "..", "..", "src")
             sys.path.insert(0, src_path)
             from ai.fall_detector import get_fall_detector

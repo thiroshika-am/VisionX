@@ -9,6 +9,7 @@ OpenCV DNN approach using a pre-trained emotion model.
 
 import base64
 import os
+import threading
 import time
 import urllib.request
 from typing import Dict, List, Optional

@@ -605,15 +605,17 @@ function updateGPS(gps) {
     // Check navigation progress
     if (state.isNavigating && state.navigationSteps.length > state.currentStepIndex) {
       const step = state.navigationSteps[state.currentStepIndex];
-      const dist = google.maps.geometry.spherical.computeDistanceBetween(pos, step.start_location);
-      if (dist < 20) { // Within 20 meters of the step start
-        const instruction = step.instructions.replace(/<[^>]*>?/gm, '');
-        speak("Navigation: " + instruction);
-        document.getElementById("nav-instruction").textContent = instruction;
+      const dist = google.maps.geometry.spherical.computeDistanceBetween(pos, step.end_location);
+      if (dist < 20) { // Within 20 meters of the step end
         state.currentStepIndex++;
         if (state.currentStepIndex >= state.navigationSteps.length) {
           speak("You have reached your destination.");
           stopNavigation();
+        } else {
+          const nextStep = state.navigationSteps[state.currentStepIndex];
+          const instruction = nextStep.instructions.replace(/<[^>]*>?/gm, '');
+          speak("Navigation: " + instruction);
+          document.getElementById("nav-instruction").textContent = instruction;
         }
       }
     }

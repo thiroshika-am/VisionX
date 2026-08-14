@@ -122,6 +122,7 @@
                   <span class="rec-dot"></span> LIVE FEED
                 </span>
                 <div class="cam-controls">
+                  <button class="cam-btn" id="btn-scan360" onclick="start360Scan()" title="360 Scan">🔄</button>
                   <button class="cam-btn" id="btn-snapshot" onclick="takeSnapshot()" title="Snapshot">📷</button>
                   <button class="cam-btn" id="btn-fullscreen" onclick="toggleFullscreen()" title="Fullscreen">⛶</button>
                   <button class="cam-btn active" id="btn-detection" onclick="toggleDetection()" title="Toggle AI">🧠</button>
@@ -363,6 +364,20 @@
             <div class="glass-card">
               <div class="card-title">TTS Settings</div>
               <div class="tts-controls">
+                <label>Language
+                  <select id="language-select" class="filter-select sm" onchange="changeLanguage(this.value, this.options[this.selectedIndex].dataset.tts)">
+                    <option value="en" data-tts="en-US">English</option>
+                    <option value="ta" data-tts="ta-IN">Tamil (தமிழ்)</option>
+                    <option value="fr" data-tts="fr-FR">French (Français)</option>
+                    <option value="ja" data-tts="ja-JP">Japanese (日本語)</option>
+                    <option value="hi" data-tts="hi-IN">Hindi (हिन्दी)</option>
+                    <option value="es" data-tts="es-ES">Spanish (Español)</option>
+                    <option value="de" data-tts="de-DE">German (Deutsch)</option>
+                    <option value="zh" data-tts="zh-CN">Chinese (中文)</option>
+                    <option value="ar" data-tts="ar-SA">Arabic (العربية)</option>
+                    <option value="ru" data-tts="ru-RU">Russian (Русский)</option>
+                  </select>
+                </label>
                 <label>Speed
                   <input type="range" min="0.5" max="2" step="0.1" value="1" id="tts-rate" oninput="updateTTS()"/>
                 </label>

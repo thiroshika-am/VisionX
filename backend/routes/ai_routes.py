@@ -338,6 +338,7 @@ def build_ai_bp(config):
             image_b64     = data.get("image")
             include_scene = data.get("include_scene", False)
             include_depth = data.get("include_depth", False)
+            language      = data.get("language", "en")
             if not image_b64:
                 return jsonify({"error": "No image"}), 400
 
@@ -403,6 +404,7 @@ def build_ai_bp(config):
                         gestures  =results.get("gestures", {}).get("gestures", []),
                         emotions  =results.get("emotions", {}).get("emotions", []),
                         poses     =results.get("poses",    {}).get("poses",    []),
+                        language  =language
                     )
                 except Exception as e:
                     errors["scene"] = str(e)
@@ -432,6 +434,7 @@ def build_ai_bp(config):
         try:
             data       = request.get_json(force=True)
             transcript = data.get("transcript", "").strip()
+            language   = data.get("language", "en")
             if not transcript:
                 return jsonify({"error": "No transcript", "action": "unknown"}), 400
 
@@ -483,7 +486,7 @@ def build_ai_bp(config):
 
             elif action == "nav_start":
                 dest  = params.get("destination", "")
-                speak = result = f"Navigation to {dest} is not yet available."
+                speak = result = f"Starting navigation to {dest}."
 
             elif action == "currency_detect":
                 image_b64 = None
@@ -514,7 +517,7 @@ def build_ai_bp(config):
                     gps = dict(state.gps_data)
                 
                 from ai_modules.interactive_assistant import get_interactive_assistant
-                ia_result = get_interactive_assistant(config).query(query_text, image_b64, gps)
+                ia_result = get_interactive_assistant(config).query(query_text, image_b64, gps, language=language)
                 speak = ia_result.get("speak", "I couldn't find an answer to that.")
                 result = ia_result.get("summary", speak)
 
@@ -543,6 +546,7 @@ def build_ai_bp(config):
         try:
             data = request.get_json(force=True)
             query = data.get("query", "").strip()
+            language = data.get("language", "en")
             if not query:
                 return jsonify({"error": "No query", "speak": "Please ask a question."}), 400
             
@@ -555,7 +559,7 @@ def build_ai_bp(config):
                 gps = dict(state.gps_data)
             
             from ai_modules.interactive_assistant import get_interactive_assistant
-            result = get_interactive_assistant(config).query(query, image_b64, gps)
+            result = get_interactive_assistant(config).query(query, image_b64, gps, language=language)
             
             if result.get("speak"):
                 state.add_announcement(result["speak"])

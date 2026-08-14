@@ -74,7 +74,7 @@ class InteractiveAssistant:
             "umbrella": ["umbrella"]
         }
         
-    def query(self, question: str, image_b64: Optional[str], gps: Dict) -> Dict:
+    def query(self, question: str, image_b64: Optional[str], gps: Dict, language: str = "en") -> Dict:
         """Main entry point to handle a user query."""
         logger.info(f"[Assistant] Received query: '{question}'")
         
@@ -86,17 +86,17 @@ class InteractiveAssistant:
         
         # 2. Route to Handler
         if intent == "find_place":
-            return self._handle_find_place(q_lower, image_b64, gps)
+            return self._handle_find_place(q_lower, image_b64, gps, language)
         elif intent == "find_person":
-            return self._handle_find_person(image_b64)
+            return self._handle_find_person(image_b64, language)
         elif intent == "find_object":
-            return self._handle_find_object(q_lower, image_b64)
+            return self._handle_find_object(q_lower, image_b64, language)
         elif intent == "read_text":
-            return self._handle_read_text(q_lower, image_b64)
+            return self._handle_read_text(q_lower, image_b64, language)
         elif intent == "path_check":
-            return self._handle_path_check(image_b64)
+            return self._handle_path_check(image_b64, language)
         else:
-            return self._handle_identify(image_b64)
+            return self._handle_identify(image_b64, language)
 
     def _classify_query(self, q: str) -> str:
         if any(w in q for w in ["person", "someone", "anyone", "people", "who"]):
@@ -124,7 +124,7 @@ class InteractiveAssistant:
 
     # ── Handlers ──────────────────────────────────────────────────────────────
 
-    def _handle_find_place(self, q: str, image_b64: Optional[str], gps: Dict) -> Dict:
+    def _handle_find_place(self, q: str, image_b64: Optional[str], gps: Dict, language: str) -> Dict:
         # Determine place type
         target_type = "store" # default
         for p_type, keywords in self.place_keywords.items():
@@ -178,7 +178,7 @@ class InteractiveAssistant:
 
         if llm and llm.llm_client:
             # Enhance with LLM if available
-            prompt = f"User asked: '{q}'. Found places: {json.dumps(places_results[:3])}. Visible sign text: '{camera_text}'. Give a short, natural spoken response."
+            prompt = f"User asked: '{q}'. Found places: {json.dumps(places_results[:3])}. Visible sign text: '{camera_text}'. Give a short, natural spoken response. You MUST reply in the language with code: {language}."
             try:
                 if llm.llm_provider in ["groq", "openai"]:
                     resp = llm.llm_client.chat.completions.create(
@@ -200,7 +200,7 @@ class InteractiveAssistant:
             "camera_text": camera_text
         }
 
-    def _handle_find_person(self, image_b64: Optional[str]) -> Dict:
+    def _handle_find_person(self, image_b64: Optional[str], language: str) -> Dict:
         if not image_b64:
             return {"speak": "I can't see the camera feed right now."}
             
@@ -245,7 +245,7 @@ class InteractiveAssistant:
             logger.error(f"[Assistant] Person find error: {e}")
             return {"speak": "I had trouble analyzing people in the scene."}
 
-    def _handle_find_object(self, q: str, image_b64: Optional[str]) -> Dict:
+    def _handle_find_object(self, q: str, image_b64: Optional[str], language: str) -> Dict:
         if not image_b64:
             return {"speak": "I can't see the camera feed right now."}
             
@@ -284,7 +284,7 @@ class InteractiveAssistant:
         except Exception as e:
             return {"speak": "I had trouble scanning for that object."}
 
-    def _handle_read_text(self, q: str, image_b64: Optional[str]) -> Dict:
+    def _handle_read_text(self, q: str, image_b64: Optional[str], language: str) -> Dict:
         if not image_b64:
             return {"speak": "I can't see the camera feed right now."}
             
@@ -305,7 +305,7 @@ class InteractiveAssistant:
                 
             speak_text = ""
             if is_medicine and llm and llm.llm_client:
-                prompt = f"Extract only the medicine/drug names from this raw OCR text. If there are none, say 'No medicines found'. Text: '{text}'"
+                prompt = f"Extract only the medicine/drug names from this raw OCR text. If there are none, say 'No medicines found'. Text: '{text}'. You MUST reply in the language with code: {language}."
                 try:
                     if llm.llm_provider in ["groq", "openai"]:
                         resp = llm.llm_client.chat.completions.create(
@@ -330,7 +330,7 @@ class InteractiveAssistant:
         except Exception as e:
             return {"speak": "I had trouble reading the text."}
 
-    def _handle_path_check(self, image_b64: Optional[str]) -> Dict:
+    def _handle_path_check(self, image_b64: Optional[str], language: str) -> Dict:
         if not image_b64:
             return {"speak": "I can't see the camera feed right now."}
             
@@ -354,7 +354,7 @@ class InteractiveAssistant:
         except Exception as e:
             return {"speak": "I couldn't verify the path."}
 
-    def _handle_identify(self, image_b64: Optional[str]) -> Dict:
+    def _handle_identify(self, image_b64: Optional[str], language: str) -> Dict:
         if not image_b64:
             return {"speak": "I can't see the camera feed right now."}
             

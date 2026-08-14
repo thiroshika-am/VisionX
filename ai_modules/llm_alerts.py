@@ -275,6 +275,7 @@ Output only the spoken text:"""
         gestures: List[Dict] = None,
         emotions: List[Dict] = None,
         poses: List[Dict] = None,
+        language: str = "en",
     ) -> str:
         """
         Generate a comprehensive natural-language description of the observed scene
@@ -289,9 +290,9 @@ Output only the spoken text:"""
             return "No scene elements detected."
 
         if self.llm_provider in ["groq", "openai"]:
-            return self._scene_with_llm(detections, gestures, emotions, poses)
+            return self._scene_with_llm(detections, gestures, emotions, poses, language)
         elif self.llm_provider == "gemini":
-            return self._scene_with_gemini(detections, gestures, emotions, poses)
+            return self._scene_with_gemini(detections, gestures, emotions, poses, language)
         else:
             return self._scene_template(detections, gestures, emotions, poses)
 
@@ -346,7 +347,7 @@ Output only the spoken text:"""
 
         return "\n".join(parts)
 
-    def _scene_with_llm(self, detections, gestures, emotions, poses) -> str:
+    def _scene_with_llm(self, detections, gestures, emotions, poses, language: str = "en") -> str:
         """Generate scene description using OpenAI/Groq."""
         try:
             context = self._build_scene_context(detections, gestures, emotions, poses)
@@ -354,7 +355,7 @@ Output only the spoken text:"""
                 "You are a visual AI assistant. Based on the following observations, "
                 "write a single fluent paragraph (2-4 sentences) describing what is happening "
                 "in the scene as if narrating to a person. Be specific about positions, emotions, "
-                "and interactions. Mention safety-relevant items first.\n\n"
+                f"and interactions. Mention safety-relevant items first. You MUST reply in the language with code: {language}\n\n"
                 f"Observations:\n{context}\n\n"
                 "Scene description:"
             )
@@ -370,12 +371,12 @@ Output only the spoken text:"""
             print(f"[LLM Scene] Error: {e}")
             return self._scene_template(detections, gestures, emotions, poses)
 
-    def _scene_with_gemini(self, detections, gestures, emotions, poses) -> str:
+    def _scene_with_gemini(self, detections, gestures, emotions, poses, language: str = "en") -> str:
         """Generate scene description using Gemini."""
         try:
             context = self._build_scene_context(detections, gestures, emotions, poses)
             prompt = (
-                f"Describe this scene in 2-3 natural sentences:\n{context}\nDescription:"
+                f"Describe this scene in 2-3 natural sentences. You MUST reply in the language with code: {language}\n{context}\nDescription:"
             )
             response = self.llm_client.generate_content(prompt)
             return response.text.strip().strip('"\'')

@@ -28,13 +28,252 @@ const state = {
   lastAlertLevel:     "SAFE",
   isProcessingFrame:  false,
   lastGuidanceTime:   0,
+  lastGuidanceAction: null,
   directionsService:  null,
   directionsRenderer: null,
   navigationSteps:    [],
   currentStepIndex:   0,
   isNavigating:       false,
   gps_data:           null,
+  language:           "en",
+  ttsLang:            "en-US",
+  isScanning360:      false,
+  scanDetections:     [],
+  scanTimeoutId:      null,
 };
+
+const TRANSLATIONS = {
+  "en": {
+    "obs_ahead_left": "Obstacle ahead, turn left.",
+    "obs_ahead_right": "Obstacle ahead, turn right.",
+    "path_blocked": "Path blocked, please stop.",
+    "obs_left_right": "Obstacle on left, stay right.",
+    "obs_right_left": "Obstacle on right, stay left.",
+    "obs_both_center": "Obstacles on both sides, stay center.",
+    "obs_both_stop": "Obstacles on both sides. Please stop and find a new path.",
+    "nav_reached": "You have reached your destination.",
+    "nav_stopped": "Navigation stopped.",
+    "nav_start": "Starting navigation to",
+    "calc_route": "Calculating route...",
+    "fail_route": "Failed to calculate route.",
+    "no_gps": "Cannot start navigation without a GPS lock.",
+    "no_dest": "Please enter a destination.",
+    "nav_instruction": "Navigation:",
+    "scan_start": "Please slowly turn around in a full circle to scan the area.",
+    "scan_clear_right": "Scan complete. Clear path to your right. Turn right.",
+    "scan_clear_left": "Scan complete. Clear path to your left. Turn left.",
+    "scan_clear_center": "Scan complete. Path ahead is clear.",
+    "scan_blocked": "Scan complete. No clear path found."
+  },
+  "ta": {
+    "obs_ahead_left": "முன்னே தடை, இடதுபுறம் திரும்பவும்.",
+    "obs_ahead_right": "முன்னே தடை, வலதுபுறம் திரும்பவும்.",
+    "path_blocked": "பாதை தடைபட்டுள்ளது, தயவுசெய்து நிற்கவும்.",
+    "obs_left_right": "இடதுபுறம் தடை, வலதுபுறம் செல்லவும்.",
+    "obs_right_left": "வலதுபுறம் தடை, இடதுபுறம் செல்லவும்.",
+    "obs_both_center": "இருபுறமும் தடைகள், நடுவில் செல்லவும்.",
+    "obs_both_stop": "இருபுறமும் தடைகள். தயவுசெய்து நின்று புதிய பாதையை தேடவும்.",
+    "nav_reached": "நீங்கள் உங்கள் இலக்கை அடைந்துவிட்டீர்கள்.",
+    "nav_stopped": "வழிசெலுத்தல் நிறுத்தப்பட்டது.",
+    "nav_start": "வழிசெலுத்தல் தொடங்குகிறது",
+    "calc_route": "பாதையை கணக்கிடுகிறது...",
+    "fail_route": "பாதையை கணக்கிட முடியவில்லை.",
+    "no_gps": "ஜிபிஎஸ் இல்லாமல் வழிசெலுத்தலை தொடங்க முடியாது.",
+    "no_dest": "தயவுசெய்து ஒரு இலக்கை உள்ளிடவும்.",
+    "nav_instruction": "வழிசெலுத்தல்:",
+    "scan_start": "பகுதியை ஸ்கேன் செய்ய தயவுசெய்து முழு வட்டமாக திரும்பவும்.",
+    "scan_clear_right": "ஸ்கேன் முடிந்தது. வலதுபுறம் பாதை தெளிவாக உள்ளது.",
+    "scan_clear_left": "ஸ்கேன் முடிந்தது. இடதுபுறம் பாதை தெளிவாக உள்ளது.",
+    "scan_clear_center": "ஸ்கேன் முடிந்தது. முன்னே பாதை தெளிவாக உள்ளது.",
+    "scan_blocked": "ஸ்கேன் முடிந்தது. தெளிவான பாதை இல்லை."
+  },
+  "fr": {
+    "obs_ahead_left": "Obstacle devant, tournez à gauche.",
+    "obs_ahead_right": "Obstacle devant, tournez à droite.",
+    "path_blocked": "Chemin bloqué, veuillez vous arrêter.",
+    "obs_left_right": "Obstacle à gauche, restez à droite.",
+    "obs_right_left": "Obstacle à droite, restez à gauche.",
+    "obs_both_center": "Obstacles des deux côtés, restez au centre.",
+    "obs_both_stop": "Obstacles des deux côtés. Veuillez vous arrêter et trouver un nouveau chemin.",
+    "nav_reached": "Vous êtes arrivé à votre destination.",
+    "nav_stopped": "Navigation arrêtée.",
+    "nav_start": "Démarrage de la navigation vers",
+    "calc_route": "Calcul de l'itinéraire...",
+    "fail_route": "Échec du calcul de l'itinéraire.",
+    "no_gps": "Impossible de démarrer la navigation sans GPS.",
+    "no_dest": "Veuillez entrer une destination.",
+    "nav_instruction": "Navigation :",
+    "scan_start": "Veuillez tourner lentement sur vous-même pour scanner la zone.",
+    "scan_clear_right": "Scan terminé. Chemin dégagé à droite. Tournez à droite.",
+    "scan_clear_left": "Scan terminé. Chemin dégagé à gauche. Tournez à gauche.",
+    "scan_clear_center": "Scan terminé. Le chemin devant est dégagé.",
+    "scan_blocked": "Scan terminé. Aucun chemin dégagé trouvé."
+  },
+  "ja": {
+    "obs_ahead_left": "前方に障害物、左に曲がってください。",
+    "obs_ahead_right": "前方に障害物、右に曲がってください。",
+    "path_blocked": "道が塞がれています、止まってください。",
+    "obs_left_right": "左に障害物、右に寄ってください。",
+    "obs_right_left": "右に障害物、左に寄ってください。",
+    "obs_both_center": "両側に障害物、中央を進んでください。",
+    "obs_both_stop": "両側に障害物。止まって新しい道を探してください。",
+    "nav_reached": "目的地に到着しました。",
+    "nav_stopped": "ナビゲーションを停止しました。",
+    "nav_start": "ナビゲーションを開始します",
+    "calc_route": "ルートを計算中...",
+    "fail_route": "ルートの計算に失敗しました。",
+    "no_gps": "GPSが取得できないためナビゲーションを開始できません。",
+    "no_dest": "目的地を入力してください。",
+    "nav_instruction": "ナビゲーション:",
+    "scan_start": "エリアをスキャンするため、ゆっくりと一周回ってください。",
+    "scan_clear_right": "スキャン完了。右側の道がクリアです。右に曲がってください。",
+    "scan_clear_left": "スキャン完了。左側の道がクリアです。左に曲がってください。",
+    "scan_clear_center": "スキャン完了。前方の道がクリアです。",
+    "scan_blocked": "スキャン完了。クリアな道が見つかりません。"
+  },
+  "hi": {
+    "obs_ahead_left": "आगे बाधा है, बाएं मुड़ें।",
+    "obs_ahead_right": "आगे बाधा है, दाएं मुड़ें।",
+    "path_blocked": "रास्ता बंद है, कृपया रुकें।",
+    "obs_left_right": "बाएं बाधा है, दाएं रहें।",
+    "obs_right_left": "दाएं बाधा है, बाएं रहें।",
+    "obs_both_center": "दोनों तरफ बाधाएं हैं, बीच में रहें।",
+    "obs_both_stop": "दोनों तरफ बाधाएं हैं। कृपया रुकें और नया रास्ता खोजें।",
+    "nav_reached": "आप अपने गंतव्य पर पहुंच गए हैं।",
+    "nav_stopped": "नेविगेशन बंद कर दिया गया है।",
+    "nav_start": "नेविगेशन शुरू कर रहा है",
+    "calc_route": "मार्ग की गणना कर रहा है...",
+    "fail_route": "मार्ग की गणना करने में विफल।",
+    "no_gps": "जीपीएस के बिना नेविगेशन शुरू नहीं किया जा सकता।",
+    "no_dest": "कृपया एक गंतव्य दर्ज करें।",
+    "nav_instruction": "नेविगेशन:",
+    "scan_start": "कृपया क्षेत्र को स्कैन करने के लिए धीरे-धीरे एक पूरा चक्कर घूमें।",
+    "scan_clear_right": "स्कैन पूरा हुआ। आपके दाईं ओर रास्ता साफ है। दाएं मुड़ें।",
+    "scan_clear_left": "स्कैन पूरा हुआ। आपके बाईं ओर रास्ता साफ है। बाएं मुड़ें।",
+    "scan_clear_center": "स्कैन पूरा हुआ। आगे का रास्ता साफ है।",
+    "scan_blocked": "स्कैन पूरा हुआ। कोई साफ रास्ता नहीं मिला।"
+  },
+  "es": {
+    "obs_ahead_left": "Obstáculo adelante, gire a la izquierda.",
+    "obs_ahead_right": "Obstáculo adelante, gire a la derecha.",
+    "path_blocked": "Camino bloqueado, por favor deténgase.",
+    "obs_left_right": "Obstáculo a la izquierda, manténgase a la derecha.",
+    "obs_right_left": "Obstáculo a la derecha, manténgase a la izquierda.",
+    "obs_both_center": "Obstáculos a ambos lados, manténgase en el centro.",
+    "obs_both_stop": "Obstáculos a ambos lados. Por favor deténgase y busque un nuevo camino.",
+    "nav_reached": "Ha llegado a su destino.",
+    "nav_stopped": "Navegación detenida.",
+    "nav_start": "Iniciando navegación hacia",
+    "calc_route": "Calculando ruta...",
+    "fail_route": "Error al calcular la ruta.",
+    "no_gps": "No se puede iniciar la navegación sin GPS.",
+    "no_dest": "Por favor ingrese un destino.",
+    "nav_instruction": "Navegación:",
+    "scan_start": "Por favor, gire lentamente en círculo para escanear el área.",
+    "scan_clear_right": "Escaneo completo. Camino despejado a su derecha.",
+    "scan_clear_left": "Escaneo completo. Camino despejado a su izquierda.",
+    "scan_clear_center": "Escaneo completo. El camino de enfrente está despejado.",
+    "scan_blocked": "Escaneo completo. No se encontró un camino despejado."
+  },
+  "de": {
+    "obs_ahead_left": "Hindernis voraus, links abbiegen.",
+    "obs_ahead_right": "Hindernis voraus, rechts abbiegen.",
+    "path_blocked": "Weg blockiert, bitte anhalten.",
+    "obs_left_right": "Hindernis links, rechts halten.",
+    "obs_right_left": "Hindernis rechts, links halten.",
+    "obs_both_center": "Hindernisse auf beiden Seiten, in der Mitte bleiben.",
+    "obs_both_stop": "Hindernisse auf beiden Seiten. Bitte anhalten und neuen Weg finden.",
+    "nav_reached": "Sie haben Ihr Ziel erreicht.",
+    "nav_stopped": "Navigation gestoppt.",
+    "nav_start": "Starte Navigation nach",
+    "calc_route": "Route berechnen...",
+    "fail_route": "Route konnte nicht berechnet werden.",
+    "no_gps": "Navigation ohne GPS nicht möglich.",
+    "no_dest": "Bitte Ziel eingeben.",
+    "nav_instruction": "Navigation:",
+    "scan_start": "Bitte drehen Sie sich langsam im Kreis, um die Umgebung zu scannen.",
+    "scan_clear_right": "Scan abgeschlossen. Weg frei auf der rechten Seite.",
+    "scan_clear_left": "Scan abgeschlossen. Weg frei auf der linken Seite.",
+    "scan_clear_center": "Scan abgeschlossen. Der Weg geradeaus ist frei.",
+    "scan_blocked": "Scan abgeschlossen. Kein freier Weg gefunden."
+  },
+  "zh": {
+    "obs_ahead_left": "前方有障碍物，向左转。",
+    "obs_ahead_right": "前方有障碍物，向右转。",
+    "path_blocked": "道路受阻，请停止。",
+    "obs_left_right": "左侧有障碍物，靠右行。",
+    "obs_right_left": "右侧有障碍物，靠左行。",
+    "obs_both_center": "两侧都有障碍物，保持在中间。",
+    "obs_both_stop": "两侧都有障碍物。请停止并寻找新路线。",
+    "nav_reached": "您已到达目的地。",
+    "nav_stopped": "导航已停止。",
+    "nav_start": "开始导航至",
+    "calc_route": "正在计算路线...",
+    "fail_route": "计算路线失败。",
+    "no_gps": "没有GPS信号，无法开始导航。",
+    "no_dest": "请输入目的地。",
+    "nav_instruction": "导航:",
+    "scan_start": "请慢慢转一整圈以扫描周围区域。",
+    "scan_clear_right": "扫描完成。右侧道路畅通，请右转。",
+    "scan_clear_left": "扫描完成。左侧道路畅通，请左转。",
+    "scan_clear_center": "扫描完成。前方道路畅通。",
+    "scan_blocked": "扫描完成。未找到畅通的道路。"
+  },
+  "ar": {
+    "obs_ahead_left": "عقبة في الأمام، انعطف يساراً.",
+    "obs_ahead_right": "عقبة في الأمام، انعطف يميناً.",
+    "path_blocked": "الطريق مسدود، يرجى التوقف.",
+    "obs_left_right": "عقبة على اليسار، ابق على اليمين.",
+    "obs_right_left": "عقبة على اليمين، ابق على اليسار.",
+    "obs_both_center": "عقبات على كلا الجانبين، ابق في الوسط.",
+    "obs_both_stop": "عقبات على كلا الجانبين. يرجى التوقف والبحث عن طريق جديد.",
+    "nav_reached": "لقد وصلت إلى وجهتك.",
+    "nav_stopped": "تم إيقاف الملاحة.",
+    "nav_start": "بدء الملاحة إلى",
+    "calc_route": "جاري حساب المسار...",
+    "fail_route": "فشل في حساب المسار.",
+    "no_gps": "لا يمكن بدء الملاحة بدون نظام تحديد المواقع.",
+    "no_dest": "الرجاء إدخال الوجهة.",
+    "nav_instruction": "الملاحة:",
+    "scan_start": "يرجى الدوران ببطء في دائرة كاملة لمسح المنطقة.",
+    "scan_clear_right": "اكتمل المسح. مسار واضح على يمينك.",
+    "scan_clear_left": "اكتمل المسح. مسار واضح على يسارك.",
+    "scan_clear_center": "اكتمل المسح. المسار أمامك واضح.",
+    "scan_blocked": "اكتمل المسح. لم يتم العثور على مسار واضح."
+  },
+  "ru": {
+    "obs_ahead_left": "Впереди препятствие, поверните налево.",
+    "obs_ahead_right": "Впереди препятствие, поверните направо.",
+    "path_blocked": "Путь заблокирован, пожалуйста, остановитесь.",
+    "obs_left_right": "Препятствие слева, держитесь правее.",
+    "obs_right_left": "Препятствие справа, держитесь левее.",
+    "obs_both_center": "Препятствия с обеих сторон, держитесь центра.",
+    "obs_both_stop": "Препятствия с обеих сторон. Пожалуйста, остановитесь и найдите новый путь.",
+    "nav_reached": "Вы достигли пункта назначения.",
+    "nav_stopped": "Навигация остановлена.",
+    "nav_start": "Запуск навигации к",
+    "calc_route": "Расчет маршрута...",
+    "fail_route": "Не удалось рассчитать маршрут.",
+    "no_gps": "Невозможно начать навигацию без GPS.",
+    "no_dest": "Пожалуйста, введите пункт назначения.",
+    "nav_instruction": "Навигация:",
+    "scan_start": "Пожалуйста, медленно повернитесь на 360 градусов для сканирования зоны.",
+    "scan_clear_right": "Сканирование завершено. Путь свободен справа.",
+    "scan_clear_left": "Сканирование завершено. Путь свободен слева.",
+    "scan_clear_center": "Сканирование завершено. Путь впереди свободен.",
+    "scan_blocked": "Сканирование завершено. Свободный путь не найден."
+  }
+};
+
+function t(key) {
+  const lang = state.language || "en";
+  return TRANSLATIONS[lang] ? (TRANSLATIONS[lang][key] || TRANSLATIONS["en"][key]) : TRANSLATIONS["en"][key];
+}
+
+function changeLanguage(lang, ttsCode) {
+  state.language = lang;
+  state.ttsLang = ttsCode;
+}
 
 // ── Bootstrap ─────────────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", boot);
@@ -155,7 +394,56 @@ async function runDetection(b64) {
   } catch (e) { /* ignore */ }
 }
 
+function start360Scan() {
+  if (state.isScanning360) return;
+  state.isScanning360 = true;
+  state.scanDetections = [];
+  speak(t("scan_start"));
+  const navInstr = document.getElementById("nav-instruction");
+  if (navInstr) {
+    navInstr.textContent = t("scan_start");
+    navInstr.classList.remove("hidden");
+  }
+  state.scanTimeoutId = setTimeout(finish360Scan, 10000); // 10s scan
+}
+
+function finish360Scan() {
+  state.isScanning360 = false;
+  
+  let leftHits = 0, centerHits = 0, rightHits = 0;
+  state.scanDetections.forEach(d => {
+    if (d.alert_level === "CRITICAL" || d.alert_level === "WARNING") {
+      const pos = d.position || "center";
+      if (pos.includes("left")) leftHits++;
+      if (pos.includes("center")) centerHits++;
+      if (pos.includes("right")) rightHits++;
+    }
+  });
+
+  let msg = t("scan_blocked");
+  if (centerHits <= leftHits && centerHits <= rightHits && centerHits < 15) {
+    msg = t("scan_clear_center");
+  } else if (rightHits <= leftHits && rightHits < 15) {
+    msg = t("scan_clear_right");
+  } else if (leftHits < 15) {
+    msg = t("scan_clear_left");
+  }
+  
+  const navInstr = document.getElementById("nav-instruction");
+  if (navInstr) {
+    navInstr.textContent = msg;
+    navInstr.classList.remove("hidden");
+    setTimeout(() => navInstr.classList.add("hidden"), 5000);
+  }
+  speak(msg);
+}
+
 function provideGuidance(detections) {
+  if (state.isScanning360) {
+    state.scanDetections.push(...detections);
+    return;
+  }
+
   const now = Date.now();
   if (now - (state.lastGuidanceTime || 0) < 4000) return; // 4 second cooldown
 
@@ -177,20 +465,49 @@ function provideGuidance(detections) {
   if (!centerBlocked && !leftBlocked && !rightBlocked) return;
 
   let msg = "";
+  let action = "";
+
+  // Time since last guidance to check for ping-ponging
+  const timeSinceLastGuidance = now - (state.lastGuidanceTime || 0);
+  const memoryActive = timeSinceLastGuidance < 10000; // 10 seconds memory
+
   if (centerBlocked) {
-    if (!leftBlocked) msg = "Obstacle ahead, turn left.";
-    else if (!rightBlocked) msg = "Obstacle ahead, turn right.";
-    else msg = "Path blocked, please stop.";
+    if (!leftBlocked) {
+      msg = t("obs_ahead_left");
+      action = "turn_left";
+    } else if (!rightBlocked) {
+      msg = t("obs_ahead_right");
+      action = "turn_right";
+    } else {
+      start360Scan();
+      return;
+    }
   } else if (leftBlocked && !rightBlocked) {
-    msg = "Obstacle on left, stay right.";
+    // Cross-check: If we recently turned left to avoid a right obstacle, we might be ping-ponging
+    if (memoryActive && state.lastGuidanceAction === "stay_left") {
+      start360Scan();
+      return;
+    } else {
+      msg = t("obs_left_right");
+      action = "stay_right";
+    }
   } else if (rightBlocked && !leftBlocked) {
-    msg = "Obstacle on right, stay left.";
+    // Cross-check: If we recently turned right to avoid a left obstacle, we might be ping-ponging
+    if (memoryActive && state.lastGuidanceAction === "stay_right") {
+      start360Scan();
+      return;
+    } else {
+      msg = t("obs_right_left");
+      action = "stay_left";
+    }
   } else if (leftBlocked && rightBlocked) {
-    msg = "Obstacles on both sides, stay center.";
+    msg = t("obs_both_center");
+    action = "stay_center";
   }
 
   if (msg) {
     state.lastGuidanceTime = now;
+    state.lastGuidanceAction = action;
     speak(msg);
   }
 }
@@ -397,7 +714,7 @@ async function requestScene() {
   document.getElementById("scene-text").textContent = "Analyzing scene…";
   try {
     const res = await apiFetch("/api/analyze-frame", {
-      method: "POST", body: { image: b64, include_scene: true }
+      method: "POST", body: { image: b64, include_scene: true, language: state.language }
     });
     const desc = res?.scene_description || "I cannot describe the scene right now.";
     document.getElementById("scene-text").textContent = desc;
@@ -609,12 +926,12 @@ function updateGPS(gps) {
       if (dist < 20) { // Within 20 meters of the step end
         state.currentStepIndex++;
         if (state.currentStepIndex >= state.navigationSteps.length) {
-          speak("You have reached your destination.");
+          speak(t("nav_reached"));
           stopNavigation();
         } else {
           const nextStep = state.navigationSteps[state.currentStepIndex];
           const instruction = nextStep.instructions.replace(/<[^>]*>?/gm, '');
-          speak("Navigation: " + instruction);
+          speak(`${t("nav_instruction")} ${instruction}`);
           document.getElementById("nav-instruction").textContent = instruction;
         }
       }
@@ -631,18 +948,18 @@ function centerMap() {
 
 async function startNavigation() {
   if (!state.gps_data || !state.gps_data.latitude) {
-    speak("Cannot start navigation without a GPS lock.");
+    speak(t("no_gps"));
     return;
   }
   const dest = document.getElementById("destination-input").value;
   if (!dest) {
-    speak("Please enter a destination.");
+    speak(t("no_dest"));
     return;
   }
 
   const origin = new google.maps.LatLng(state.gps_data.latitude, state.gps_data.longitude);
   
-  document.getElementById("nav-instruction").textContent = "Calculating route...";
+  document.getElementById("nav-instruction").textContent = t("calc_route");
   document.getElementById("nav-instruction").classList.remove("hidden");
   
   state.directionsService.route(
@@ -660,10 +977,10 @@ async function startNavigation() {
         state.isNavigating = true;
         document.getElementById("stop-nav-btn").classList.remove("hidden");
         
-        speak(`Starting navigation to ${dest}. ${route.steps[0].instructions.replace(/<[^>]*>?/gm, '')}`);
+        speak(`${t("nav_start")} ${dest}. ${route.steps[0].instructions.replace(/<[^>]*>?/gm, '')}`);
         document.getElementById("nav-instruction").textContent = route.steps[0].instructions.replace(/<[^>]*>?/gm, '');
       } else {
-        speak("Failed to calculate route.");
+        speak(t("fail_route"));
         document.getElementById("nav-instruction").classList.add("hidden");
       }
     }
@@ -680,7 +997,7 @@ function stopNavigation() {
   document.getElementById("stop-nav-btn").classList.add("hidden");
   document.getElementById("nav-instruction").classList.add("hidden");
   document.getElementById("destination-input").value = "";
-  speak("Navigation stopped.");
+  speak(t("nav_stopped"));
 }
 
 // ── Voice ─────────────────────────────────────────────────────────────────────
@@ -756,8 +1073,37 @@ async function sendVoiceCmd(transcript) {
   document.getElementById("response-box").textContent   = "Processing…";
   try {
     const res = await apiFetch("/api/voice/command", {
-      method: "POST", body: { transcript }
+      method: "POST", body: { transcript, language: state.language }
     });
+    
+    if (res?.action === "nav_start" && res?.params?.destination) {
+      document.getElementById("destination-input").value = res.params.destination;
+      document.getElementById("response-box").textContent = res?.speak || `Navigating to ${res.params.destination}`;
+      startNavigation(); // This sets up the route and handles its own speech!
+      addCmdHistory(transcript, res?.speak || "Starting navigation", true);
+      return; 
+    }
+    
+    if (res?.action === "nav_stop") {
+      stopNavigation();
+      document.getElementById("response-box").textContent = t("nav_stopped");
+      addCmdHistory(transcript, "Navigation stopped", true);
+      return;
+    }
+
+    if (res?.action === "sos_trigger") {
+      // Create a visual SOS alert on the dashboard
+      const viewport = document.getElementById("camera-viewport");
+      if (viewport) {
+        let sosBanner = document.createElement("div");
+        sosBanner.className = "camera-offline-overlay";
+        sosBanner.style.backgroundColor = "rgba(255, 0, 0, 0.8)";
+        sosBanner.innerHTML = `<span>🆘 SOS EMERGENCY TRIGGERED 🆘</span><p>Alerting contacts...</p>`;
+        viewport.appendChild(sosBanner);
+        setTimeout(() => sosBanner.remove(), 5000);
+      }
+    }
+
     const speak_text = res?.speak || res?.result || "Done.";
     document.getElementById("response-box").textContent = speak_text;
     speak(speak_text);
@@ -789,6 +1135,7 @@ function speak(text) {
   utt.rate    = state.ttsRate;
   utt.volume  = state.ttsVol;
   utt.pitch   = state.ttsPitch;
+  utt.lang    = state.ttsLang || "en-US";
   state.synthesis.speak(utt);
 }
 
@@ -1060,7 +1407,7 @@ async function queryAssistant(queryText) {
   
   try {
     const res = await apiFetch("/api/assistant/query", {
-      method: "POST", body: { query: queryText, image: b64 }
+      method: "POST", body: { query: queryText, image: b64, language: state.language }
     });
     
     if (res) {

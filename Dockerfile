@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 COPY config/requirements.txt config/requirements.txt
-RUN pip install --no-cache-dir -r config/requirements.txt
+RUN pip install --default-timeout=1000 --no-cache-dir -r config/requirements.txt
 
 COPY . .
 

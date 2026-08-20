@@ -35,6 +35,8 @@ const state = {
   currentStepIndex:   0,
   isNavigating:       false,
   gps_data:           null,
+  lastDetections:     [],
+  navTickInterval:    null,
   language:           "en",
   ttsLang:            "en-US",
   isScanning360:      false,
@@ -385,6 +387,7 @@ async function runDetection(b64) {
   try {
     const res  = await apiFetch("/api/detect", { method: "POST", body: { image: b64 } });
     if (!res) return;
+    state.lastDetections = res.detections || [];
     drawDetections(res.detections || []);
     updateLiveDetections(res.detections || []);
     updateAlertLevel(res.alert_level || "SAFE");
@@ -977,6 +980,10 @@ async function startNavigation() {
         state.isNavigating = true;
         document.getElementById("stop-nav-btn").classList.remove("hidden");
         
+        if (state.navTickInterval) clearInterval(state.navTickInterval);
+        state.navTickInterval = setInterval(navigationTick, 4000);
+        
+        
         speak(`${t("nav_start")} ${dest}. ${route.steps[0].instructions.replace(/<[^>]*>?/gm, '')}`);
         document.getElementById("nav-instruction").textContent = route.steps[0].instructions.replace(/<[^>]*>?/gm, '');
       } else {
@@ -991,6 +998,10 @@ function stopNavigation() {
   state.isNavigating = false;
   state.navigationSteps = [];
   state.currentStepIndex = 0;
+  if (state.navTickInterval) {
+    clearInterval(state.navTickInterval);
+    state.navTickInterval = null;
+  }
   if (state.directionsRenderer) {
     state.directionsRenderer.setDirections({routes: []});
   }
@@ -998,6 +1009,28 @@ function stopNavigation() {
   document.getElementById("nav-instruction").classList.add("hidden");
   document.getElementById("destination-input").value = "";
   speak(t("nav_stopped"));
+}
+
+function navigationTick() {
+  if (!state.isNavigating) return;
+
+  const obstacles = state.lastDetections.filter(d => d.alert_level === "CRITICAL" || d.alert_level === "WARNING");
+  const centerBlocked = obstacles.some(d => d.position === "center");
+  const rightBlocked = obstacles.some(d => d.position === "right");
+  const leftBlocked = obstacles.some(d => d.position === "left");
+
+  if (centerBlocked) {
+    if (rightBlocked && leftBlocked) {
+      speak("Path entirely blocked. Rerouting...");
+      startNavigation(); // Re-trigger startNavigation to compute new route from current GPS
+    } else if (rightBlocked) {
+      speak("Obstacle ahead and right. Turn left, move forward.");
+    } else {
+      speak("Obstacle ahead. Turn right, move forward.");
+    }
+  } else {
+    speak("Move forward.");
+  }
 }
 
 // ── Voice ─────────────────────────────────────────────────────────────────────

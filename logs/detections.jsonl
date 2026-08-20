@@ -16520,3 +16520,262 @@
 {"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.92, "distance": "2.0m", "position": "center", "alert": "WARNING"}], "_ts": "2026-07-16T08:33:05.394302+00:00"}
 {"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.92, "distance": "2.0m", "position": "center", "alert": "WARNING"}], "_ts": "2026-07-16T08:33:06.221792+00:00"}
 {"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.92, "distance": "2.0m", "position": "center", "alert": "WARNING"}], "_ts": "2026-07-16T08:33:07.006264+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:37:22.810415+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.51, "distance": "2.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:37:23.614341+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.87, "distance": "2.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:37:24.644449+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.68, "distance": "2.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:37:25.344319+00:00"}
+{"count": 2, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.48, "distance": "2.3m", "position": "center", "alert": "WARNING"}, {"class": "person", "confidence": 0.4, "distance": "2.3m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:37:26.058363+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.53, "distance": "2.3m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:37:26.755376+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.55, "distance": "2.3m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:37:27.466824+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.75, "distance": "2.3m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:37:28.166193+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.77, "distance": "2.3m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:37:28.876083+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.79, "distance": "2.3m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:37:29.598462+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.53, "distance": "2.2m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:37:30.301846+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:37:30.980222+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.49, "distance": "2.1m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:37:31.696062+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.91, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:37:32.404000+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.89, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:37:33.098601+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.92, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:37:33.793504+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.76, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:37:34.506419+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.77, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:37:35.202958+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.83, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:37:35.908785+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.79, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:37:36.612774+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.82, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:37:37.321400+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.85, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:37:38.023667+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.88, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:37:38.720929+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.78, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:37:39.423942+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.83, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:37:40.128411+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.88, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:37:40.834933+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.87, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:37:41.534942+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.87, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:37:42.243379+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.86, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:37:42.945157+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.87, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:37:43.739961+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.86, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:37:44.437336+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.89, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:37:45.151126+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.88, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:37:45.848768+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.89, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:37:46.556505+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.89, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:37:47.287884+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.87, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:37:47.993886+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.88, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:37:48.702789+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.9, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:37:49.402718+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.92, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:37:50.115339+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.88, "distance": "2.0m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:37:50.833617+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.92, "distance": "2.1m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:37:51.542757+00:00"}
+{"count": 2, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.54, "distance": "2.4m", "position": "right", "alert": "WARNING"}, {"class": "person", "confidence": 0.5, "distance": "2.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:37:52.239568+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.85, "distance": "2.5m", "position": "right", "alert": "WARNING"}], "_ts": "2026-08-15T08:37:52.940751+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:37:53.749093+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:37:54.428356+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:37:55.105416+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:37:55.793709+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:37:56.481052+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:37:57.161431+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:37:57.842160+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:37:58.522229+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:37:59.191327+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.51, "distance": "2.1m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:37:59.891087+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.7, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:00.608474+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.79, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:01.303839+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.83, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:02.030303+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.82, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:02.728848+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.86, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:03.457586+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.87, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:04.162810+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.86, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:04.887983+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.86, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:05.592751+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.86, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:06.289352+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.89, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:07.008019+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.76, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:07.712793+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.74, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:08.406496+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.69, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:09.110357+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.47, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:09.813202+00:00"}
+{"count": 2, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.79, "distance": "1.4m", "position": "center", "alert": "WARNING"}, {"class": "person", "confidence": 0.43, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:10.518065+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.82, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:11.240570+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.85, "distance": "1.5m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:11.959264+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.88, "distance": "1.5m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:12.658169+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.88, "distance": "1.5m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:13.361766+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.89, "distance": "1.5m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:14.063422+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.88, "distance": "1.5m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:14.769329+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.8, "distance": "1.5m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:15.474127+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.65, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:16.171125+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.64, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:16.872800+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.85, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:17.560317+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.8, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:18.265849+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.9, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:18.976936+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.87, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:19.689858+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.89, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:20.410733+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.92, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:21.108434+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.91, "distance": "1.5m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:21.805346+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.91, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:22.507152+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.91, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:23.217417+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.9, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:23.927712+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.91, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:24.623711+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.93, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:25.325603+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.9, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:26.023537+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:38:26.705594+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:38:27.383919+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.51, "distance": "2.3m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:28.095908+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.53, "distance": "2.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:28.805321+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.52, "distance": "2.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:29.516052+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.44, "distance": "2.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:30.209060+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.42, "distance": "2.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:30.908374+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.47, "distance": "2.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:31.626002+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.43, "distance": "2.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:32.319892+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.49, "distance": "2.3m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:33.030493+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:38:33.785127+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.52, "distance": "2.2m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:34.621632+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.45, "distance": "2.2m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:35.320942+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.46, "distance": "2.2m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:36.122482+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.62, "distance": "2.3m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:36.831454+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.79, "distance": "2.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:37.576995+00:00"}
+{"count": 1, "alert_level": "SAFE", "objects": [{"class": "person", "confidence": 0.52, "distance": "2.6m", "position": "center", "alert": "SAFE"}], "_ts": "2026-08-15T08:38:38.296953+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:38:38.979880+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.42, "distance": "2.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:39.672350+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.91, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:40.381096+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.81, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:41.087791+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.87, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:41.806800+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.6, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:42.511180+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.9, "distance": "1.4m", "position": "right", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:43.208560+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.8, "distance": "1.5m", "position": "right", "alert": "WARNING"}], "_ts": "2026-08-15T08:38:43.901536+00:00"}
+{"count": 1, "alert_level": "SAFE", "objects": [{"class": "bed", "confidence": 0.45, "distance": "2.9m", "position": "right", "alert": "SAFE"}], "_ts": "2026-08-15T08:38:44.597846+00:00"}
+{"count": 1, "alert_level": "SAFE", "objects": [{"class": "bed", "confidence": 0.54, "distance": "2.9m", "position": "right", "alert": "SAFE"}], "_ts": "2026-08-15T08:38:45.317330+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:38:46.001451+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:38:46.697083+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:38:47.373543+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:38:48.093549+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:38:48.780437+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:38:49.471216+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:38:50.164940+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:38:50.837686+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:38:51.533435+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:38:52.216186+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:38:52.947968+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:38:53.814080+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:38:54.536712+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:38:55.245721+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:38:55.938529+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:38:56.618961+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:38:57.301197+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:38:57.986847+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:38:58.674628+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:38:59.360529+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:39:00.047506+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:39:00.731801+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:39:01.420857+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:39:02.097964+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:39:02.776999+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:39:03.492986+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:39:04.200626+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:39:04.903650+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:39:05.591963+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:39:06.282127+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:39:06.969058+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:39:07.659667+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:39:08.344377+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:39:09.031875+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:39:09.721740+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:39:10.412019+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:39:11.115089+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:39:11.807836+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:39:12.492860+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:39:13.177080+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:39:13.872885+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.93, "distance": "1.4m", "position": "right", "alert": "WARNING"}], "_ts": "2026-08-15T08:39:14.579679+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.94, "distance": "1.4m", "position": "right", "alert": "WARNING"}], "_ts": "2026-08-15T08:39:15.295703+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.86, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:39:16.010799+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.84, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:39:17.962679+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.87, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:39:18.817598+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.91, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:39:19.576526+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.9, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:39:20.339147+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.92, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:39:21.082864+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.93, "distance": "1.7m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:39:21.862606+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.82, "distance": "2.3m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:39:22.599640+00:00"}
+{"count": 1, "alert_level": "SAFE", "objects": [{"class": "person", "confidence": 0.71, "distance": "4.1m", "position": "center", "alert": "SAFE"}], "_ts": "2026-08-15T08:39:23.372891+00:00"}
+{"count": 1, "alert_level": "SAFE", "objects": [{"class": "person", "confidence": 0.88, "distance": "4.0m", "position": "center", "alert": "SAFE"}], "_ts": "2026-08-15T08:39:24.114249+00:00"}
+{"count": 1, "alert_level": "SAFE", "objects": [{"class": "person", "confidence": 0.86, "distance": "3.3m", "position": "center", "alert": "SAFE"}], "_ts": "2026-08-15T08:39:24.920062+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:39:25.649180+00:00"}
+{"count": 1, "alert_level": "SAFE", "objects": [{"class": "person", "confidence": 0.81, "distance": "4.2m", "position": "center", "alert": "SAFE"}], "_ts": "2026-08-15T08:39:26.389320+00:00"}
+{"count": 2, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.91, "distance": "2.1m", "position": "center", "alert": "WARNING"}, {"class": "person", "confidence": 0.85, "distance": "4.1m", "position": "right", "alert": "SAFE"}], "_ts": "2026-08-15T08:39:27.157708+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.93, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:39:27.896402+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.91, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:39:28.645546+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.92, "distance": "1.6m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:39:29.386421+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:39:30.095122+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:39:30.844970+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:39:31.551112+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:39:32.257971+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:39:32.991145+00:00"}
+{"count": 4, "alert_level": "SAFE", "objects": [{"class": "kite", "confidence": 0.72, "distance": "8.2m", "position": "right", "alert": "SAFE"}, {"class": "kite", "confidence": 0.57, "distance": "7.6m", "position": "center", "alert": "SAFE"}, {"class": "kite", "confidence": 0.54, "distance": "7.8m", "position": "center", "alert": "SAFE"}, {"class": "kite", "confidence": 0.48, "distance": "8.0m", "position": "center", "alert": "SAFE"}], "_ts": "2026-08-15T08:39:33.905749+00:00"}
+{"count": 3, "alert_level": "SAFE", "objects": [{"class": "kite", "confidence": 0.68, "distance": "7.6m", "position": "right", "alert": "SAFE"}, {"class": "kite", "confidence": 0.49, "distance": "8.0m", "position": "center", "alert": "SAFE"}, {"class": "kite", "confidence": 0.46, "distance": "9.9m", "position": "center", "alert": "SAFE"}], "_ts": "2026-08-15T08:39:34.663027+00:00"}
+{"count": 4, "alert_level": "SAFE", "objects": [{"class": "kite", "confidence": 0.76, "distance": "7.6m", "position": "right", "alert": "SAFE"}, {"class": "kite", "confidence": 0.56, "distance": "8.0m", "position": "center", "alert": "SAFE"}, {"class": "kite", "confidence": 0.53, "distance": "8.0m", "position": "center", "alert": "SAFE"}, {"class": "kite", "confidence": 0.52, "distance": "8.0m", "position": "center", "alert": "SAFE"}], "_ts": "2026-08-15T08:39:35.402089+00:00"}
+{"count": 4, "alert_level": "SAFE", "objects": [{"class": "kite", "confidence": 0.41, "distance": "7.8m", "position": "center", "alert": "SAFE"}, {"class": "kite", "confidence": 0.57, "distance": "8.2m", "position": "center", "alert": "SAFE"}, {"class": "kite", "confidence": 0.51, "distance": "8.7m", "position": "center", "alert": "SAFE"}, {"class": "kite", "confidence": 0.45, "distance": "8.2m", "position": "right", "alert": "SAFE"}], "_ts": "2026-08-15T08:39:36.155274+00:00"}
+{"count": 4, "alert_level": "SAFE", "objects": [{"class": "kite", "confidence": 0.6, "distance": "8.2m", "position": "center", "alert": "SAFE"}, {"class": "kite", "confidence": 0.55, "distance": "8.0m", "position": "right", "alert": "SAFE"}, {"class": "kite", "confidence": 0.52, "distance": "8.0m", "position": "center", "alert": "SAFE"}, {"class": "kite", "confidence": 0.51, "distance": "8.0m", "position": "center", "alert": "SAFE"}], "_ts": "2026-08-15T08:39:36.891968+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:39:37.603877+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:39:38.326985+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:39:39.046470+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "bed", "confidence": 0.5, "distance": "1.1m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:39:39.787932+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:39:40.507839+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:39:41.211411+00:00"}
+{"count": 1, "alert_level": "SAFE", "objects": [{"class": "kite", "confidence": 0.48, "distance": "7.6m", "position": "right", "alert": "SAFE"}], "_ts": "2026-08-15T08:39:41.954600+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:39:42.663882+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:39:43.392514+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "refrigerator", "confidence": 0.62, "distance": "1.1m", "position": "left", "alert": "WARNING"}], "_ts": "2026-08-15T08:39:44.143057+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "toothbrush", "confidence": 0.51, "distance": "1.9m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:39:44.911188+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "refrigerator", "confidence": 0.53, "distance": "1.1m", "position": "right", "alert": "WARNING"}], "_ts": "2026-08-15T08:39:45.652177+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "bottle", "confidence": 0.43, "distance": "1.5m", "position": "right", "alert": "WARNING"}], "_ts": "2026-08-15T08:39:46.436770+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "bottle", "confidence": 0.5, "distance": "1.5m", "position": "right", "alert": "WARNING"}], "_ts": "2026-08-15T08:39:47.173200+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "bottle", "confidence": 0.62, "distance": "1.5m", "position": "right", "alert": "WARNING"}], "_ts": "2026-08-15T08:39:47.907588+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "bottle", "confidence": 0.5, "distance": "1.5m", "position": "right", "alert": "WARNING"}], "_ts": "2026-08-15T08:39:48.653888+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:39:49.370824+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:39:50.085471+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:39:50.805922+00:00"}
+{"count": 1, "alert_level": "SAFE", "objects": [{"class": "person", "confidence": 0.75, "distance": "4.2m", "position": "left", "alert": "SAFE"}], "_ts": "2026-08-15T08:39:51.540083+00:00"}
+{"count": 2, "alert_level": "SAFE", "objects": [{"class": "person", "confidence": 0.75, "distance": "4.5m", "position": "left", "alert": "SAFE"}, {"class": "person", "confidence": 0.82, "distance": "5.1m", "position": "left", "alert": "SAFE"}], "_ts": "2026-08-15T08:39:52.305543+00:00"}
+{"count": 2, "alert_level": "SAFE", "objects": [{"class": "person", "confidence": 0.88, "distance": "4.8m", "position": "left", "alert": "SAFE"}, {"class": "person", "confidence": 0.88, "distance": "4.5m", "position": "left", "alert": "SAFE"}], "_ts": "2026-08-15T08:39:53.036822+00:00"}
+{"count": 2, "alert_level": "SAFE", "objects": [{"class": "person", "confidence": 0.83, "distance": "4.9m", "position": "left", "alert": "SAFE"}, {"class": "person", "confidence": 0.8, "distance": "4.5m", "position": "left", "alert": "SAFE"}], "_ts": "2026-08-15T08:39:53.851585+00:00"}
+{"count": 2, "alert_level": "SAFE", "objects": [{"class": "person", "confidence": 0.88, "distance": "4.3m", "position": "left", "alert": "SAFE"}, {"class": "person", "confidence": 0.89, "distance": "5.1m", "position": "left", "alert": "SAFE"}], "_ts": "2026-08-15T08:39:54.604648+00:00"}
+{"count": 2, "alert_level": "SAFE", "objects": [{"class": "person", "confidence": 0.87, "distance": "4.5m", "position": "left", "alert": "SAFE"}, {"class": "person", "confidence": 0.89, "distance": "5.4m", "position": "center", "alert": "SAFE"}], "_ts": "2026-08-15T08:39:55.389939+00:00"}
+{"count": 2, "alert_level": "SAFE", "objects": [{"class": "person", "confidence": 0.85, "distance": "4.7m", "position": "left", "alert": "SAFE"}, {"class": "person", "confidence": 0.87, "distance": "5.6m", "position": "center", "alert": "SAFE"}], "_ts": "2026-08-15T08:39:56.125830+00:00"}
+{"count": 2, "alert_level": "SAFE", "objects": [{"class": "person", "confidence": 0.88, "distance": "5.5m", "position": "center", "alert": "SAFE"}, {"class": "person", "confidence": 0.82, "distance": "5.0m", "position": "left", "alert": "SAFE"}], "_ts": "2026-08-15T08:39:56.892845+00:00"}
+{"count": 2, "alert_level": "SAFE", "objects": [{"class": "person", "confidence": 0.88, "distance": "5.6m", "position": "center", "alert": "SAFE"}, {"class": "person", "confidence": 0.72, "distance": "5.4m", "position": "left", "alert": "SAFE"}], "_ts": "2026-08-15T08:39:57.626763+00:00"}
+{"count": 2, "alert_level": "SAFE", "objects": [{"class": "person", "confidence": 0.84, "distance": "5.6m", "position": "center", "alert": "SAFE"}, {"class": "person", "confidence": 0.73, "distance": "5.7m", "position": "left", "alert": "SAFE"}], "_ts": "2026-08-15T08:39:58.398655+00:00"}
+{"count": 2, "alert_level": "SAFE", "objects": [{"class": "person", "confidence": 0.8, "distance": "4.3m", "position": "center", "alert": "SAFE"}, {"class": "person", "confidence": 0.89, "distance": "3.3m", "position": "right", "alert": "SAFE"}], "_ts": "2026-08-15T08:39:59.133194+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:39:59.849090+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:40:00.559318+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:40:01.283960+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:40:02.005479+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:40:02.704887+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:40:03.405355+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:40:04.114307+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:40:04.844938+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:40:05.544294+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:40:06.249636+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:40:06.971876+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:40:07.678956+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:40:08.380305+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:40:09.082112+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:40:09.790610+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:40:10.532361+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:40:11.240167+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:40:12.008176+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:40:12.760862+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:40:13.471858+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:40:14.176253+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:40:14.884943+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:40:15.581633+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:40:16.278106+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:40:16.984070+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:40:17.698284+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:40:18.399641+00:00"}
+{"count": 0, "alert_level": "SAFE", "objects": [], "_ts": "2026-08-15T08:40:19.122189+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.91, "distance": "1.4m", "position": "right", "alert": "WARNING"}], "_ts": "2026-08-15T08:40:19.891451+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.94, "distance": "1.4m", "position": "right", "alert": "WARNING"}], "_ts": "2026-08-15T08:40:20.624796+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.86, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:40:21.393714+00:00"}
+{"count": 2, "alert_level": "CRITICAL", "objects": [{"class": "person", "confidence": 0.54, "distance": "1.4m", "position": "center", "alert": "WARNING"}, {"class": "book", "confidence": 0.54, "distance": "0.7m", "position": "left", "alert": "CRITICAL"}], "_ts": "2026-08-15T08:40:22.139447+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.76, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:40:22.887250+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.67, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:40:23.738445+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.79, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:40:24.469918+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.86, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:40:25.216399+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.86, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:40:25.987002+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.9, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:40:26.757309+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.64, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:40:27.505266+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.91, "distance": "1.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:40:28.242310+00:00"}
+{"count": 1, "alert_level": "WARNING", "objects": [{"class": "person", "confidence": 0.49, "distance": "2.4m", "position": "center", "alert": "WARNING"}], "_ts": "2026-08-15T08:40:28.982349+00:00"}
+{"count": 1, "alert_level": "SAFE", "objects": [{"class": "person", "confidence": 0.54, "distance": "2.6m", "position": "center", "alert": "SAFE"}], "_ts": "2026-08-15T08:40:29.724678+00:00"}

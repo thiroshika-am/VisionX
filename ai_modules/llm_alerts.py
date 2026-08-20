@@ -353,7 +353,7 @@ Output only the spoken text:"""
             context = self._build_scene_context(detections, gestures, emotions, poses)
             prompt = (
                 "You are a visual AI assistant. Based on the following observations, "
-                "write a single fluent paragraph (2-4 sentences) describing what is happening "
+                "write a detailed and comprehensive paragraph (4-6 sentences) describing what is happening "
                 "in the scene as if narrating to a person. Be specific about positions, emotions, "
                 f"and interactions. Mention safety-relevant items first. You MUST reply in the language with code: {language}\n\n"
                 f"Observations:\n{context}\n\n"
@@ -363,7 +363,7 @@ Output only the spoken text:"""
             response = self.llm_client.chat.completions.create(
                 model=model,
                 messages=[{"role": "user", "content": prompt}],
-                max_tokens=120,
+                max_tokens=300,
                 temperature=0.6,
             )
             return response.choices[0].message.content.strip().strip('"\'')
@@ -376,7 +376,7 @@ Output only the spoken text:"""
         try:
             context = self._build_scene_context(detections, gestures, emotions, poses)
             prompt = (
-                f"Describe this scene in 2-3 natural sentences. You MUST reply in the language with code: {language}\n{context}\nDescription:"
+                f"Describe this scene in detail in 4-6 natural sentences. Be specific about positions, emotions, and interactions. You MUST reply in the language with code: {language}\n{context}\nDescription:"
             )
             response = self.llm_client.generate_content(prompt)
             return response.text.strip().strip('"\'')

@@ -17,6 +17,13 @@
       "email": "gurupriyaps14@gmail.com",
       "created_at": "2026-02-27T07:26:36.716656+00:00",
       "last_login": "2026-02-27T07:26:37.225868+00:00"
+    },
+    "testuser": {
+      "password_hash": "099d816a67727a1c4f841e9d49fe094e$e6541c1a6a5f4dbe98133f65edd60369ba4061a33bbebbde4b4a7f5bc7b37afc",
+      "email": "test@example.com",
+      "created_at": "2026-08-21T10:11:52.154289+00:00",
+      "last_login": "2026-08-21T10:11:52.154289+00:00",
+      "token": "54fd7c5ecceb84a64d032af3e69b64ee9fd8db3a3886145724755a2ab5ad833e"
     }
   }
 }

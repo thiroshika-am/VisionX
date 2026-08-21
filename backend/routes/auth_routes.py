@@ -49,8 +49,8 @@ def build_auth_bp(config):
         data = request.get_json(force=True)
         if not isinstance(data, dict):
             return jsonify({"success": False, "message": "Invalid JSON payload"}), 400
-        username = data.get("username", "").strip()
-        password = data.get("password", "")
+        username = (data.get("username") or "").strip()
+        password = data.get("password") or ""
         if not username or not password:
             return jsonify({"success": False, "message": "Username and password required"}), 400
         users_data = _load_users()
@@ -69,9 +69,9 @@ def build_auth_bp(config):
         data = request.get_json(force=True)
         if not isinstance(data, dict):
             return jsonify({"success": False, "message": "Invalid JSON payload"}), 400
-        username = data.get("username", "").strip()
-        password = data.get("password", "")
-        email    = data.get("email", "").strip()
+        username = (data.get("username") or "").strip()
+        password = data.get("password") or ""
+        email    = (data.get("email") or "").strip()
         if not username or not password:
             return jsonify({"success": False, "message": "Username and password required"}), 400
         if len(username) < 3:

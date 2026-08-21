@@ -251,9 +251,12 @@ class ObjectDetector:
             base64_image = base64_image.split(",")[1]
         
         # Decode base64 to numpy array
-        img_bytes = base64.b64decode(base64_image)
-        img_array = np.frombuffer(img_bytes, dtype=np.uint8)
-        img = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
+        try:
+            img_bytes = base64.b64decode(base64_image)
+            img_array = np.frombuffer(img_bytes, dtype=np.uint8)
+            img = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
+        except Exception:
+            img = None
         
         if img is None:
             return {"error": "Invalid image", "detections": [], "count": 0, "alert_level": "SAFE"}

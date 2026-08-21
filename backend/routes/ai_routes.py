@@ -139,7 +139,7 @@ def build_ai_bp(config):
     def add_face():
         try:
             data  = request.get_json(force=True)
-            name  = data.get("name", "").strip()
+            name  = (data.get("name") or "").strip()
             photo = data.get("photo", "")
             if not name:
                 return jsonify({"error": "Name required"}), 400
@@ -433,7 +433,7 @@ def build_ai_bp(config):
     def voice_command():
         try:
             data       = request.get_json(force=True)
-            transcript = data.get("transcript", "").strip()
+            transcript = (data.get("transcript") or "").strip()
             language   = data.get("language", "en")
             if not transcript:
                 return jsonify({"error": "No transcript", "action": "unknown"}), 400
@@ -545,7 +545,7 @@ def build_ai_bp(config):
         """Universal interactive query — ask about places, people, objects, text."""
         try:
             data = request.get_json(force=True)
-            query = data.get("query", "").strip()
+            query = (data.get("query") or "").strip()
             language = data.get("language", "en")
             if not query:
                 return jsonify({"error": "No query", "speak": "Please ask a question."}), 400

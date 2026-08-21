@@ -50,7 +50,7 @@ class InteractiveAssistant:
         
         # Keyword mappings for Place Intent
         self.place_keywords = {
-            "supermarket": ["supermarket", "grocery", "store", "shop"],
+            "supermarket": ["supermarket", "grocery store", "grocery shop", "grocery"],
             "restaurant": ["restaurant", "food", "eat", "cafe", "dining"],
             "pharmacy": ["pharmacy", "medicine shop", "medical store", "chemist"],
             "bank": ["bank", "atm", "cash"],
